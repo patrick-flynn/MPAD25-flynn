@@ -23,7 +23,7 @@ clean:
 	rm -rf includes/*.o
 	if [ -f memory.dump ]; then rm memory.dump; fi
 
-run:
+run: all
 	@echo "Launching emulator..."
 	mkdir -p storage
 	cp bin/$(NAME).neo storage
