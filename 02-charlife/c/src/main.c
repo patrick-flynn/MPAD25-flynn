@@ -36,9 +36,7 @@ unsigned long NeoAPIRand16(unsigned long max)
   KSendMessageSync(API_GROUP_MATH,API_FN_RND_DEC);
 
   res =  (reg[1]&0xff) | (reg[2]<<8) | ((unsigned long)reg[3] <<16) | ((unsigned long)reg[4]<<24) ; 
-  //res =  (reg[1]&0xff) | (reg[2]<<8); 
-  //res =  Reg1[2] + (((unsigned int)Reg1[4])<<8);
-  printf("res %lx\n",res);
+  //printf("res %lx\n",res);
   return res;
 }
 
