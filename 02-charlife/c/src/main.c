@@ -16,7 +16,7 @@
 #include <neo/console.h>
 
 // this code based on the NeoAPIRand16() function written by Gollan, 9/3/24
-unsigned long NeoAPIRand16(unsigned long max)
+unsigned long neo_math_random_integer(unsigned long max)
 {
   uint8_t reg[5]; // Register1
   uint16_t regp = (uint16_t)reg;
@@ -24,45 +24,22 @@ unsigned long NeoAPIRand16(unsigned long max)
 
   // set max range of requested random integer... 5 bytes, every second address
   reg[0] = 0x00;   // type: 32-bit integer, little endian
-  reg[1] = max&0xff; // 0x00;   // byte0 (lsb) of max range+2 $ffff+1/65535+1 (only asking for 16-bits)
+  reg[1] = max&0xff; // byte0 (lsb) of max range
   reg[2] = (max>>8)&0xff; //0x00;   // byte1 of max range
   reg[3] = (max>>16)&0xff; //0x01;   // byte2 of max range
   reg[4] = (max>>24)&0xff; //0x00;   // byte3 (msb) of max range
 
+  // set up register1
   ControlPort.params[0] = (uint8_t)(regp & 0xFF);
   ControlPort.params[1] = (uint8_t)(regp >> 8);
   ControlPort.params[2] = 0x01;
 
-  KSendMessageSync(API_GROUP_MATH,API_FN_RND_DEC);
+  KSendMessageSync(API_GROUP_MATH,API_FN_RND_INT);
 
   res =  (reg[1]&0xff) | (reg[2]<<8) | ((unsigned long)reg[3] <<16) | ((unsigned long)reg[4]<<24) ; 
   //printf("res %lx\n",res);
   return res;
 }
-
-// RANDOM glue code.
-// references: section 3 of neo6502 documentation ("Neo6502 Messaging API")
-// One register is used - specify the address of the register to be the address of a local
-// copy of max; specify an offset of 1 (so the register is four consecutive bytes
-uint16_t neo_math_random_decimal(uint16_t max) {
-	uint8_t register1[5] = { 0, max&0xff, (max>>8), 0, 0};
-	uint16_t res;
-	volatile uint8_t *cp = (uint8_t *)ControlPort.params;
-	uint8_t *rp = register1;
-	//printf("cp %p rp %p\n",cp,rp);
-	cp[0] = rp[1]; cp[1] = rp[0];
-       	cp[2] = 1; // byte offset of 1 between registers ==> Reg1 is 5 contig bytes.
-	//printf("b4 reg1 %x %x %x %x %x\n",register1[0],register1[1],register1[2],register1[3],register1[4]);
-	KSendMessageSync(API_GROUP_MATH,API_FN_RND_DEC);
-	//printf("error: %d\n",ControlPort.error);
-	// slurp result out of register1
-	res = (uint16_t)(register1[2]<<8) + register1[1]; 
-	//printf("after reg1 %x %x %x %x %x\n",register1[0],register1[1],register1[2],register1[3],register1[4]);
-	printf("res %d\n",res);
-	//exit(1);
-	return res;
-}
-	
 
 // screen size - note: the board size is nr x (nc-1) to avoid scrolling resulting
 // from character I/O in the righmost position of a line (no way to poke screen memory
@@ -128,8 +105,8 @@ int main(void) {
   // initialize - no random numbers yet
   for(i=0;i<nr;i++) {
 	  for(j=0;j<nc;j++) {
-	 	 curboard[i][j] = ((i+j*j)&0x01) ? 2 : 0;
-	 	 curboard[i][j] = (NeoAPIRand16(0xff) & 0x01) ? 1 : 0 ;
+		 // 0 or 1
+	 	 curboard[i][j] = neo_math_random_integer((unsigned long)2);
 		 }
 	  }
 

@@ -2,16 +2,17 @@
 # Makefile Options
 # ----------------------------
 
-NAME       = 01-hello-world
+NAME       = 03-estimatepi
 CC         = mos-neo6502-clang
 NEOEMU     = neo
+NEO_HOME   = ~/development/tools/neo6502/
 
 default: all
 
 all:
 	@echo "Building project..."
 	mkdir -p bin
-	$(CC) -Os -o bin/$(NAME).neo src/main.c
+	mos-neo6502-clang -Os -o bin/$(NAME).neo src/main.c
 	rm bin/$(NAME).neo.elf
 
 clean:
