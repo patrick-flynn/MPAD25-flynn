@@ -53,3 +53,9 @@ dkms.conf
 
 # debug information files
 *.dwo
+
+# Neo6502-specific
+*.neo
+*.nee
+memory.dump
+storage/
