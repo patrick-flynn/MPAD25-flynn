@@ -2,10 +2,15 @@
 / Title: 03-estimatepi
 /
 // Description: estimate pi using stochastic integration.
+//
+//// The idea:
 // Throw uniform random darts at the [-1,1] x [-1,1] square in 2d
 // Determine the fraction that are alse inside the unit radius circle centered
 // at the origin. The fraction of the latter to the total is pi/4.  Report
 // the estimate of pi from those counts. 
+//
+// The reality: floating-point support in LLVM-MOS is not complete, so we have to do this in
+// integers.
 /
 / Author: PF
 /
@@ -20,35 +25,45 @@
 #include <neo/console.h>
 
 // this code based on the NeoAPIRand16() function written by Gollan, 9/3/24
-float neo_math_random_decimal(void)
+unsigned long neo_math_random_integer(unsigned long max)
 {
-  // a union type to represent the math API's "register" construct
-  union { char flag; float f; } register1;
-  uint16_t r1ptr = (uint16_t)&register1;
+  typedef struct _neomathreg {
+	  uint8_t flag;
+	  union {
+		  unsigned long l;
+		  float f;
+	  } v;
+  } neo_math_register;
+  neo_math_register reg1,*reg1p=&reg1;
 
-  register1.flag = 1<<6; // specify that register1 will hold a float.
-			 //
-  // set up register1 to hold return value (we're not passing anything)
-  ControlPort.params[0] = (uint8_t)(r1ptr & 0xFF);
-  ControlPort.params[1] = (uint8_t)(r1ptr >> 8);
-  ControlPort.params[2] = 0x01; // only one register in use
+  // set max range of requested random integer... 5 bytes, every second address
+  reg1.v.l = max;
+  reg1.flag = 0x00; // integer
+  ControlPort.params[0] = (uint8_t)((uint16_t)reg1p & 0x00ff);
+  ControlPort.params[1] = (uint8_t)((uint16_t)reg1p >> 8) & 0x00ff;
+  ControlPort.params[2] = 0x01; // only one reg, no interleaving
 
-  KSendMessageSync(API_GROUP_MATH,API_FN_RND_DEC);
-  // copy bytes of result (IEEE 32-bit float) from reg (on the stack frame)
-  // into function result (which is preserved by the compiler)
-  return register1.f;
+  KSendMessageSync(API_GROUP_MATH,API_FN_RND_INT);
+
+  return reg1.v.l;
 }
 
+
 int main(void) {
-  unsigned int n_inside_circle = 0;
-  unsigned int i;
+  unsigned long n_inside_circle = 0;
+  unsigned long i;
 
   for(i=1;i<32700; i++) {
-	  float x = neo_math_random_decimal();
-	  float y = neo_math_random_decimal();
-	  float r2 = x*x + y*y;
-	  if (r2 <= 1.0) n_inside_circle++;
-          printf("%u / %u\r",4*n_inside_circle, i);
+	  unsigned long x = neo_math_random_integer(32768);
+	  unsigned long y = neo_math_random_integer(32768);
+	  if ((x>=32768) || (y>=32768)) {
+		  printf("ERROR: x %lu y %lu, should be <32768.\n",x,y);
+		  exit(0);
 	  }
+	  unsigned long r2 = x*x + y*y;
+	  if (r2 <= 32768*32768) n_inside_circle++;
+          printf("%lu / %lu\r",4*n_inside_circle, i);
+	  }
+  printf("Approximate estimate *10000: %lu\n",(unsigned long)40000*n_inside_circle/i);
   exit(0);
 }
