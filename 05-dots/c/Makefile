@@ -26,6 +26,7 @@ run: all
 	@echo "Launching emulator..."
 	mkdir -p storage
 	cp bin/$(NAME).neo storage
-	$(NEOEMU) bin/$(NAME).neo cold
+	#$(NEOEMU) bin/$(NAME).neo cold
+	$(NEOEMU) bin/$(NAME).neo
 	rm -rf storage
 	rm memory.dump
