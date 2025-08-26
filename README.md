@@ -13,7 +13,8 @@ Very much a work-in-progress
   * `RUN`
   If it runs, your emulator works.
 
-1. Install llvm-mos-sdk
-1. Install Andy McCall's C examples from [here](https://github.com/andymccall/neo6502-development.git)
-1. Make sure you can follow each and every one of the C examples.
+1. Install llvm-mos-sdk (binaries available for Windows and Linux, Mac compilation was straightforward - ask for help if you're struggling) 
 
+1. Install Andy McCall's C examples from [here](https://github.com/andymccall/neo6502-development.git) and make sure you can follow each and every one of the C examples.
+
+1. Look at and run the examples here. 
