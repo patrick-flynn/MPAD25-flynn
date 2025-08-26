@@ -2,7 +2,7 @@
 # Makefile Options
 # ----------------------------
 
-NAME       = 02-charlife
+NAME       = 06-twinkledots
 CC         = mos-neo6502-clang
 NEOEMU     = neo
 
@@ -27,5 +27,13 @@ run: all
 	mkdir -p storage
 	cp bin/$(NAME).neo storage
 	$(NEOEMU) bin/$(NAME).neo
+	rm -rf storage
+	rm memory.dump
+
+runcold: all
+	@echo "Launching emulator..."
+	mkdir -p storage
+	cp bin/$(NAME).neo storage
+	$(NEOEMU) bin/$(NAME).neo cold
 	rm -rf storage
 	rm memory.dump

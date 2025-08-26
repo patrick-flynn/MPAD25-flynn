@@ -2,7 +2,7 @@
 # Makefile Options
 # ----------------------------
 
-NAME       = 02-charlife
+NAME       = C_PROGRAM_VARIABLE
 CC         = mos-neo6502-clang
 NEOEMU     = neo
 
@@ -26,6 +26,6 @@ run: all
 	@echo "Launching emulator..."
 	mkdir -p storage
 	cp bin/$(NAME).neo storage
-	$(NEOEMU) bin/$(NAME).neo
+	$(NEOEMU) bin/$(NAME).neo cold
 	rm -rf storage
 	rm memory.dump

@@ -2,17 +2,16 @@
 # Makefile Options
 # ----------------------------
 
-NAME       = movingdot
+NAME       = 04-stripes
 CC         = mos-neo6502-clang
 NEOEMU     = neo
-NEO_HOME   = /usr/local/bin/neo
 
 default: all
 
 all:
 	@echo "Building project..."
 	mkdir -p bin
-	mos-neo6502-clang -Os -o bin/$(NAME).neo src/main.c
+	$(CC) -Os -o bin/$(NAME).neo src/main.c
 	rm bin/$(NAME).neo.elf
 
 clean:
@@ -27,6 +26,6 @@ run:
 	@echo "Launching emulator..."
 	mkdir -p storage
 	cp bin/$(NAME).neo storage
-	$(NEOEMU) bin/$(NAME).neo cold
+	$(NEOEMU) bin/$(NAME).neo
 	rm -rf storage
 	rm memory.dump
