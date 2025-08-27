@@ -2,7 +2,7 @@
 # Makefile Options
 # ----------------------------
 
-NAME       = 08-bouncingimg
+NAME       = 10-tilemap
 CC         = mos-neo6502-clang
 NEOEMU     = neo
 
@@ -26,7 +26,7 @@ run: all
 	@echo "Launching emulator..."
 	mkdir -p storage
 	cp bin/$(NAME).neo storage
-	cp sprite.gfx storage
+	cp tileset.gfx storage
 	$(NEOEMU) bin/$(NAME).neo
 	rm -rf storage
 	rm memory.dump
