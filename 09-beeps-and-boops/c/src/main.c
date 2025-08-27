@@ -1,7 +1,7 @@
 /* 
-/ Title: 08-bouncingimg
+/ Title: 09-beeps-and-boops
 /
-/ Description: draw a moving sprite
+/ Description: beeps and boops. And sprites as in 08-bouncingsprite
 /
 / Author: Flynn	
 /

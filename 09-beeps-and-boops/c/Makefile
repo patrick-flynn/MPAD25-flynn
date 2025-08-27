@@ -2,7 +2,7 @@
 # Makefile Options
 # ----------------------------
 
-NAME       = 08-bouncingimg
+NAME       = 09-beeps-and-boops
 CC         = mos-neo6502-clang
 NEOEMU     = neo
 
