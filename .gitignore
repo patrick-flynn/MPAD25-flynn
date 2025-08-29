@@ -57,5 +57,9 @@ dkms.conf
 # Neo6502-specific
 *.neo
 *.nee
+*.s
 memory.dump
+Makefile-e
+README.md-e
 storage/
+bin/

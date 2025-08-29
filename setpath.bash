@@ -5,7 +5,7 @@ hn=`hostname -s`
 
 if [ -d /opt/llvm-mos/bin ]; then
   PATH=/opt/llvm-mos/bin:${PATH}
-  echo "/opt/llvm-mos added to PATH."
+  echo "/opt/llvm-mos/bin added to PATH."
 else
   echo "/opt/llvm-mos/bin not found - not modifying PATH"
 fi

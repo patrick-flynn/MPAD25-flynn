@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+#
+# Written by Andy McCall
+#
+# repo: https://github.com/andymccall/neo6502-development
+#
+# Tweaked by Pat Flynn
 
 echo -n "Creating new C project..."
 mkdir -p $1

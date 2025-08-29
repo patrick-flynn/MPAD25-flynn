@@ -1,5 +1,5 @@
 /* 
- * Title: 04-movingdot - C example
+ * Title: 04-stripes - C example
  * Author: P Flynn
  * Date: 19-Apr-2025
 */
