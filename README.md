@@ -3,6 +3,9 @@ Flynn's repo for the CSE 40679 Fall 2025 class
 
 Very much a work-in-progress
 
+## `setpath.bash`
+The `setpath.bash` sceript is what I use on my systems to quickly add the `neo` emulator and the `llvm-mos` compiler suite to my search path. They assume that llvm-mos is installed in `/opt/llvm-mos` and that the neo6502-firmware is stored in `~/Desktop/MPAD25/forks/neo6502-firmware`. You will probably need to change it.  Use this script by `source setpath.bash`. If you run `bash setpath.bash`, it won't do anything because you're running it in a child `bash` process.
+
 ## Getting Started
 
 1. Install firmware and emulator
