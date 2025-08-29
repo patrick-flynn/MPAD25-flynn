@@ -3,12 +3,16 @@
 # Note: run with 
 hn=`hostname -s`
 
-if [[ "$hn" ==  "wazoo" ]]; then
- PATH=/opt/llvm-mos/bin:/Users/flynn/Desktop/MPAD25/neo6502-firmware/bin:${PATH}
-elif [[ "$hn" == "CSE-FLYNN" ]]; then
- PATH=/opt/llvm-mos-sdk/bin:/Users/flynn/Desktop/MPAD25/neo6502-firmware/bin:${PATH}
+if [ -d /opt/llvm-mos/bin ]; then
+  PATH=/opt/llvm-mos/bin:${PATH}
+  echo "/opt/llvm-mos added to PATH."
 else
- echo "Unknown host $hn"
+  echo "/opt/llvm-mos/bin not found - not modifying PATH"
 fi
 
- 
+if [ -d ${HOME}/Desktop/MPAD25/forks/neo6502-firmware/bin ]; then
+  PATH=${HOME}/Desktop/MPAD25/forks/neo6502-firmware/bin:${PATH}
+  echo "${HOME}/Desktop/MPAD25/forks/neo6502-firmware/bin added to PATH."
+else
+  echo "${HOME}/Desktop/MPAD25/forks/neo6502-firmware/bin not found - not modifying PATH"
+fi
