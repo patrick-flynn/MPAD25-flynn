@@ -53,7 +53,7 @@ int main(void) {
   unsigned long n_inside_circle = 0;
   unsigned long i;
 
-  for(i=1;i<32700; i++) {
+  for(i=1;i<25000; i++) {
 	  unsigned long x = neo_math_random_integer(32768);
 	  unsigned long y = neo_math_random_integer(32768);
 	  if ((x>=32768) || (y>=32768)) {
@@ -62,8 +62,8 @@ int main(void) {
 	  }
 	  unsigned long r2 = x*x + y*y;
 	  if (r2 <= 32768*32768) n_inside_circle++;
-          printf("%lu / %lu\r",4*n_inside_circle, i);
-	  }
-  printf("Approximate estimate *10000: %lu\n",(unsigned long)40000*n_inside_circle/i);
+      if ((i%1000) == 0) printf("%lu / %lu\r",4*n_inside_circle, i);
+  }
+  printf("Approximate estimate *100000: %llu\n",(unsigned long long)400000*(unsigned long long)n_inside_circle/(unsigned long long)i);
   exit(0);
 }
