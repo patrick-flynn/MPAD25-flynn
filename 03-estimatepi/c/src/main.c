@@ -52,6 +52,7 @@ unsigned long neo_math_random_integer(unsigned long max)
 int main(void) {
   unsigned long n_inside_circle = 0;
   unsigned long i;
+  unsigned long res;
 
   for(i=1;i<25000; i++) {
 	  unsigned long x = neo_math_random_integer(32768);
@@ -65,5 +66,10 @@ int main(void) {
       if ((i%1000) == 0) printf("%lu / %lu\r",4*n_inside_circle, i);
   }
   printf("Approximate estimate *100000: %llu\n",(unsigned long long)400000*(unsigned long long)n_inside_circle/(unsigned long long)i);
+
+  res = (unsigned long)((unsigned long long)400000*(unsigned long long)n_inside_circle/(unsigned long long)i);
+
+  printf("Approximate estimate *100000: %lu\n",res);
+
   exit(0);
 }
