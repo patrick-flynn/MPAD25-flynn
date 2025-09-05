@@ -10,7 +10,7 @@ default: all
 
 all:
 	@echo "Building project..."
-	python makegfx.py
+	python3 makegfx.py
 	mkdir -p bin
 	$(CC) -Os -o bin/$(NAME).neo src/main.c
 	rm bin/$(NAME).neo.elf

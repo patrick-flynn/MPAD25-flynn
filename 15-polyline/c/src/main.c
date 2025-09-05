@@ -47,9 +47,13 @@ unsigned long neo_math_random_integer(unsigned long max) {
 #define SC_W 320
 #define SC_H 240
 
+#define VELOCITY_MAX 3
+
 typedef struct {
   uint16_t x; // 0 - 319
   uint16_t y; // 0 - 239
+  int8_t vx;
+  int8_t vy;
   } vertex_t;
 
 void draw_polyline(vertex_t *vtx, uint16_t nvtx, uint8_t color) {
@@ -61,6 +65,37 @@ void draw_polyline(vertex_t *vtx, uint16_t nvtx, uint8_t color) {
       }
     }
 
+void update_polyline(vertex_t *vtx, uint16_t nvtx) {
+    uint16_t i;
+    int16_t newx,newy;
+    for(i=0;i<nvtx;i++) {
+      newx = (int16_t)vtx[i].x + vtx[i].vx;
+      newy = (int16_t)vtx[i].y + vtx[i].vy;
+
+      if (newx < 0) {
+        vtx[i].x = 0;
+        vtx[i].vx *= -1;
+        } 
+      else if (newx >= SC_W) {
+        vtx[i].x = SC_W-1;
+        vtx[i].vx *= -1;
+        } 
+      else
+        vtx[i].x = newx;
+
+      if (newy < 0) {
+        vtx[i].y = 0;
+        vtx[i].vy *= -1;
+        }
+      else if (newy >= SC_H) {
+        vtx[i].y = SC_H-1;
+        vtx[i].vy *= -1;
+        }
+      else 
+        vtx[i].y = newy;
+      }
+}
+
 // this useful function will pause until the screen is redrawn.
 void wait_frame(void) {
   uint32_t fc = neo_graphics_frame_count();
@@ -70,7 +105,7 @@ void wait_frame(void) {
 int main(void) {
   vertex_t vertex[N_VERTICES];
   uint16_t i;
-  uint8_t color=1;
+  uint8_t color= 1 + neo_math_random_integer(15);
  
   // define vertices
   for(i=0;i<N_VERTICES;i++) {
@@ -78,6 +113,8 @@ int main(void) {
     uint16_t y = neo_math_random_integer(SC_H);
     vertex[i].x = x;
     vertex[i].y = y;
+    vertex[i].vx = neo_math_random_integer(2*VELOCITY_MAX-1) - VELOCITY_MAX;
+    vertex[i].vy = neo_math_random_integer(2*VELOCITY_MAX-1) - VELOCITY_MAX;
     }
  
   //draw the polyline
@@ -90,16 +127,9 @@ int main(void) {
   //   c. draw the polyline
   while (1==1) {
     draw_polyline(vertex,N_VERTICES,0); // draw in black to erase
-    for(i=0;i<N_VERTICES;i++) {
-      uint32_t r = neo_math_random_integer(0xffff);
-      if (r&0x8000) 
-        vertex[i].x += r&0x3;
-      else 
-        vertex[i].x -= r&0x3;
-      // squash to one indecipherable line
-      vertex[i].y += ((r&0x4000)?-1:1) * ((r&0x0C)>>2);
-      }
+    update_polyline(vertex,N_VERTICES);
     draw_polyline(vertex,N_VERTICES,color);
+    color = 1 + neo_math_random_integer(15);
     wait_frame();
     }
 }
