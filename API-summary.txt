@@ -1,0 +1,530 @@
+Neo6502 cheat sheet - just the facts!
+05-Sep-2025 PJF
+
+ALWAYS include <neo6502.h>
+
+1. Console - #include <neo/console.h>
+
+a. char neo_console_read_char(void); // return q'ed key press, or 0 if no q
+b. uint8_t neo_console_status(void); // return 0xFF is kbd q empty, 0 if ot
+c. void neo_console_read_line_p(neo_pstring_t *line); // don't use.
+d. void neo_console_read_line(char *buf); // read line(s) below cursor into buf
+e. void neo_console_define_hotkey_p(uint8_t hotkey, const neo_pstring_t *str);
+   // ^ don't use ^
+f. void neo_console_define_hotkey(uint8_t hotkey, const char *str);
+   // ^ define a hotkey which emits a C-style string when pressed ^
+g. void neo_console_define_char(char ch, const uint8_t *bitmap);
+   // ^ define font character ^
+h. void neo_console_write_char(char ch); // write char to console
+i. void neo_console_set_cursor_pos(uint8_t x, uint8_t y); // set cons cursor pos
+j. void neo_console_list_hotkeys(void); // display current F-key defns
+k. void neo_console_screen_size(uint8_t *width, uint8_t *height); // get cons sz
+l. void neo_console_clear_screen(void); // clear the screen
+m. void neo_console_cursor_pos(uint8_t *x, uint8_t *y); // get cons cursor pos
+n. void neo_console_clear_region(uint8_t x1,uint8_t y1,uint8_t x2,uint8_t y2);
+   // ^ clear all text within a range of console rows and cols ^
+o. void neo_console_set_text_color(uint8_t fg, uint8_t bg); // set text colors
+p. void neo_console_get_text_color(uint8_t *fg, uint8_t *bg); // get txt colors
+q. void neo_console_set_cursor_visibility(uint8_t value); // set cursor vis
+
+7 - Controller - #include <neo/controller.h>
+
+a. uint8_t neo_controller_read_default(void); // read default controller state
+b. uint8_t neo_controller_count(void); // get number of  attached controllers
+c. uint32_t neo_controller_read(uint8_t index); // get state of indexed contr
+
+3 - File I/O - #include <neo/file.h>
+
+a. void neo_file_list_directory(void); // list directory contents
+b. void neo_file_load_p(const neo_pstring_t *filename, void *dest); // DON'T USE
+c. void neo_file_load(const char *filename, void *dest); // load file to "dest"
+d. void neo_file_store_p(const neo_pstring_t *filename, const void *src,
+                         uint16_t len); // DON'T USE
+e. void neo_file_store(const char *filename, const void *src, uint16_t len);
+   // ^ store bytes in memory to file ^ 
+f. void neo_file_open_p(uint8_t channel, const neo_pstring_t *filename,
+                        uint8_t mode); // DON'T USE
+g. void neo_file_open(uint8_t channel, const char *filename, uint8_t mode);
+   // ^ open a file, attach to a channel
+h. void neo_file_close(uint8_t channel); // close file attached to channel
+i. void neo_file_seek(uint8_t channel, uint32_t pos); // seek
+j. uint32_t neo_file_tell(uint8_t channel); // tell
+k. uint16_t neo_file_read(uint8_t channel, void *dest, uint16_t len);
+   // ^ read bytes from an open file into  memory
+l. uint32_t neo_file_write(uint8_t channel, const void *src, uint16_t len);
+   // ^ write bytes from memory to an open file
+m. uint32_t neo_file_size(uint8_t channel); // get size of open file
+n. void neo_file_set_size(uint8_t channel, uint32_t size); // set file size (?)
+o. void neo_file_rename_p(const neo_pstring_t *from, const neo_pstring_t *to);
+   // ^ DON'T USE ^
+p. void neo_file_rename(const char *from, const char *to); / rename a file
+q. void neo_file_delete_p(const neo_pstring_t *filename); // DON'T USE
+r. void neo_file_delete(const char *filename); // delete named file
+s. void neo_file_chdir_p(const neo_pstring_t *path); // DON'T USE
+t. void neo_file_chdir(const char *path); // change directory
+u. void neo_file_mkdir_p(const neo_pstring_t *path); // DON'T USE
+v. void neo_file_mkdir(const char *path); // create new directory
+w. void neo_file_stat_p(const neo_pstring_t *path, neo_file_stat_t *st);
+   // ^ DON'T USE ^
+x. void neo_file_stat(const char *path, neo_file_stat_t *st);
+   // stat a file
+y. void neo_file_opendir_p(const neo_pstring_t *path); // DON'T USE
+z. void neo_file_opendir(const char *path); // open dir for enumeration
+aa. void neo_file_readdir_p(neo_pstring_t *path, neo_file_stat_t *st);
+    // ^ DON'T USE ^
+ab. void neo_file_readdir(char *path, neo_file_stat_t *st);
+    // read next element from directory, return name and stat
+ac. void neo_file_closedir(void); // close directory
+ad. void neo_file_copy_p(const neo_pstring_t *from, const neo_pstring_t *to);
+    // ^ DON'T USE ^
+ae. void neo_file_copy(const char *from, const char *to);
+    // copy file using source and destination names
+af. void neo_file_set_attr_p(const neo_pstring_t *path, uint8_t attr);
+    // ^ DON'T USE ^
+ag. void neo_file_set_attr(const char *path, uint8_t attr);
+    // set attributes of named file
+ah. bool neo_file_eof(uint8_t channel); // check if file position is EOF
+ai. void neo_file_get_cwd(char *buffer, uint8_t length); // get cwd name
+aj. void neo_file_list_filtered_p(const neo_pstring_t *filter);
+    // ^ DON'T USE ^
+ak. void neo_file_list_filtered(const char *filter);
+    // print filtered list of files in current directory
+
+5 - Graphics - #include <neo/graphics.h>
+
+a. void neo_graphics_set_defaults(uint8_t color_mask, uint8_t color_xor,
+                                  uint8_t fill, uint8_t extent, uint8_t flip);
+   // ^ reset graphics system with desired properties ^
+b. void neo_graphics_draw_line(uint16_t x1,uint16_t y1,uint16_tx2,uint16_t y2);
+   // ^ draw a line ^
+c. void neo_graphics_draw_rectangle(uint16_t x1, uint16_t y1,
+                                    uint16_t x2, uint16_t y2);
+   // ^ draw a rectangle ^
+d. void neo_graphics_draw_ellipse(uint16_t x1, uint16_t y1,
+                                  uint16_t x2, uint16_t y2);
+   // ^ draw an ellipse ^
+e. void neo_graphics_draw_pixel(uint16_t x, uint16_t y); // draw a pixel
+f. void neo_graphics_draw_text_p(uint16_t x, uint16_t y,
+                                 const neo_pstring_t *text);
+   // ^ DO NOT USE ^
+g. void neo_graphics_draw_text(uint16_t x, uint16_t y, const char *text);
+   // ^ draw a string ^
+h. void neo_graphics_draw_image(uint16_t x, uint16_t y, uint8_t id);
+   // ^ draw the image with the specified ID with topleft corner at (x,y)
+i. void neo_graphics_draw_tilemap(uint16_t x1, uint16_t y1,
+                                  uint16_t x2, uint16_t y2);
+   // ^ draw the current tilemap with corners at (x1,y1) and (x2,y2)
+j. void neo_graphics_set_palette(uint8_t idx, uint8_t r, uint8_t g, uint8_t b);
+   // ^ set a palette color ^
+k. uint8_t neo_graphics_read_pixel(uint16_t x, uint16_t y);
+   // ^ get color at a specified pixel ^
+l. void neo_graphics_write_pixel(uint16_t x, uint16_t y, uint8_t idx);
+   // ^ set color at a specified pixel ^
+m. void neo_graphics_reset_palette(void); // reset color palette
+n. void neo_graphics_set_tilemap(const void *src, uint16_t x, uint16_t y);
+   // ^ set current tilemap ^
+o. long neo_graphics_frame_count(void); // get global count of frames drawn
+p. void neo_graphics_set_color(uint8_t idx); // set drawing color
+q. void neo_graphics_set_solid_flag(uint8_t value); // set solid drawing flag
+r. void neo_graphics_set_draw_size(uint8_t value); // set drawing size
+s. void neo_graphics_set_flip_bits(uint8_t value);
+   // ^ set flip bits for drawing images ^
+
+11 - Mouse - #include <neo/mouse.h>
+
+a. void neo_mouse_move_display_cursor(uint16_t x, uint16_t y);
+   // ^ set mouse cursor position ^
+b. void neo_mouse_set_mouse_display_cursor(uint8_t onOff);
+   // ^ set display mouse cursor ^
+c. void neo_mouse_get_mouse_state(uint16_t *xPos, uint16_t *yPos,
+                                  uint8_t *buttonState,
+                                  uint8_t *scrollWheelState);
+   // ^ get current position and state of mouse ^
+d. uint8_t neo_mouse_test_mouse_present(void); // test if mouse is present
+3. void neo_mouse_select_mouse_cursor(uint8_t index); // select mouse cursor
+
+8 - Sound - #include <neo/sound.h>
+
+a. void neo_sound_reset(void); // reset sound system
+b. void neo_sound_reset_channel(uint8_t channel); // reset a channel
+c. void neo_sound_beep(void); // beep
+d. void neo_sound_queue(uint8_t channel, uint16_t frequency, uint16_t duration,
+                        uint16_t slide, uint8_t target);
+   // ^ enqueue a sound ^
+e. void neo_sound_play_effect(uint8_t channel, uint8_t id);
+   // ^ play a sound effect ^
+f. uint8_t neo_sound_status(uint8_t channel); // query status of channel
+g. uint8_t neo_sound_channel_count(void); // get number of channels
+
+6 - Sprites - #include <neo/sprites.h>
+
+/**
+ * @brief Reset the sprite system.
+ */
+void neo_sprite_reset(void);
+
+/**
+ * @brief Set the sprite.
+ *
+ * @param id Sprite ID
+ * @param x X position
+ * @param y Y position
+ * @param img Image paramemters
+ * @param flip Flip axis
+ * @param anchor Anchor value
+ */
+void neo_sprite_set(uint8_t id, uint16_t x, uint16_t y, uint8_t img, uint8_t flip, uint8_t anchor);
+
+/**
+ * @brief Hide the specified sprite.
+ *
+ * @param id Sprite ID
+ */
+void neo_sprite_hide(uint8_t id);
+
+/**
+ * @brief Check collision between two sprites.
+ *
+ * @param first First sprite ID
+ * @param second Second sprite ID
+ * @param distance Maximum distance between sprites
+ */
+bool neo_sprite_collision(uint8_t first, uint8_t second, uint8_t distance);
+
+/**
+ * @brief Get sprite position.
+ *
+ * @param id Sprite ID
+ * @param x X position
+ * @param y Y position
+ */
+void neo_sprite_position(uint8_t id, uint16_t *x, uint16_t *y);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+// Copyright 2024 LLVM-MOS Project
+// Licensed under the Apache License, Version 2.0 with LLVM Exceptions.
+// See https://github.com/llvm-mos/llvm-mos-sdk/blob/main/LICENSE for license
+// information.
+
+#include <stdint.h>
+
+#ifndef _NEO_SYSTEM_H
+#define _NEO_SYSTEM_H
+
+#include <neo6502.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief Return the error code, if any.
+ *
+ * @return Non-zero if an error has occured.
+ */
+uint8_t neo_api_error(void);
+
+/**
+ * @brief Query the value of the 100Hz system timer.
+ *
+ * @return Current system timer value.
+ */
+long neo_system_timer(void);
+
+/**
+ * @brief Query the state of the specific keyboard key.
+ *
+ * @param key Key to query.
+ * @return Key status.
+ */
+uint8_t neo_system_key_status(char key);
+
+/**
+ * @brief Print the Neo6502 project contributors.
+ */
+void neo_system_credits(void);
+
+/**
+ * @brief Update the serial command handler.
+ */
+void neo_system_serial_update(void);
+
+/**
+ * @brief Set the locale code.
+ *
+ * @param locale Locale code, for example "EN" or "FR".
+ */
+void neo_system_locale(const char *locale);
+
+/**
+ * @brief Reset the Neo6502.
+ */
+__attribute__((leaf, noreturn))
+void neo_system_reset(void);
+
+/**
+ * @brief Write a character to the debug port.
+ *
+ * @param ch Character to write.
+ */
+void neo_system_debug_putc(char ch);
+
+typedef struct neo_version {
+    uint8_t major, minor, patch;
+} neo_version_t;
+
+/**
+ * @brief Retrieve the Neo6502 version.
+ *
+ * @param version Pointer to neo_version_t structure.
+ */
+void neo_system_version(neo_version_t *version);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+// Copyright 2024 LLVM-MOS Project
+// Licensed under the Apache License, Version 2.0 with LLVM Exceptions.
+// See https://github.com/llvm-mos/llvm-mos-sdk/blob/main/LICENSE for license
+// information.
+
+#include <stdint.h>
+
+#ifndef _NEO_TURTLE_H
+#define _NEO_TURTLE_H
+
+#include <neo6502.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief Initialise the turtle graphics system.
+ *
+ * @param idx Sprite index to use for the turtle.
+ */
+void neo_turtle_init(uint8_t idx);
+
+/**
+ * @brief Turn the turtle right. Show if hidden.
+ *
+ * @param deg Degrees.
+ */
+void neo_turtle_turn(int16_t deg);
+
+/**
+ * @brief Move the turtle forward. Show if hidden.
+ *
+ * @param len Pixels to move.
+ * @param color Color to draw.
+ * @param pen Pen down flag.
+ */
+void neo_turtle_move(int16_t len, uint8_t color, uint8_t pen);
+
+/**
+ * @brief Hide the turtle.
+ */
+void neo_turtle_hide(void);
+
+/**
+ * @brief Move the turtle to the home position - centered, facing upward.
+ */
+void neo_turtle_home(void);
+
+/**
+ * @brief Show the turtle.
+ */
+void neo_turtle_show(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+// Copyright 2024 LLVM-MOS Project
+// Licensed under the Apache License, Version 2.0 with LLVM Exceptions.
+// See https://github.com/llvm-mos/llvm-mos-sdk/blob/main/LICENSE for license
+// information.
+
+#include <stdint.h>
+
+#ifndef _NEO_TYPES_H
+#define _NEO_TYPES_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef struct neo_pstring {
+    uint8_t length;
+    char data[];
+} neo_pstring_t;
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+// Copyright 2024 LLVM-MOS Project
+// Licensed under the Apache License, Version 2.0 with LLVM Exceptions.
+// See https://github.com/llvm-mos/llvm-mos-sdk/blob/main/LICENSE for license
+// information.
+
+#include <stdint.h>
+
+#ifndef _NEO_UEXT_H
+#define _NEO_UEXT_H
+
+#include <neo6502.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef enum neo_uext_direction {
+    NEO_UEXT_INPUT = 1,
+    NEO_UEXT_OUTPUT = 2,
+    NEO_UEXT_ANALOGUE_INPUT = 3
+} neo_uext_direction_t;
+
+/**
+ * @brief Initialise the UExt I/O system.
+ *
+ * Set all UEXT pins to I/O pins, inputs and enabled.
+ */
+void neo_uext_init(void);
+
+/**
+ * @brief Write the specified value to the output latch for the specified UEXT pin.
+ *
+ * This will only be output if the pin is enabled and its direction set to output.
+ *
+ * Check errors with @see neo_api_error
+ */
+void neo_uext_gpio_write(uint8_t pin, uint8_t value);
+
+/**
+ * @brief Reads the value on the specified UEXT pin.
+ *
+ * If the pin is set to input, this will read the level on the pin.
+ * If the pin is set to output, this will read the value set on the output latch. @see neo_uext_gpio_write
+ *
+ * Check errors with @see neo_api_error
+ */
+uint8_t neo_uext_gpio_read(uint8_t pin);
+
+/**
+ * @brief Set the direction of the specified UEXT pin.
+ *
+ * @see neo_uext_direction_t
+ *
+ * Check errors with @see neo_api_error
+ */
+void neo_uext_gpio_set_direction(uint8_t pin, uint8_t direction);
+
+/**
+ * @brief Write to an I2C device.
+ *
+ * Check errors with @see neo_api_error
+ */
+void neo_uext_i2c_write(uint8_t device, uint8_t reg, uint8_t value);
+
+/**
+ * @brief Read from an I2C device.
+ *
+ * Check errors with @see neo_api_error
+ */
+uint8_t neo_uext_i2c_read(uint8_t device, uint8_t reg);
+
+/**
+ * @brief Read from an analogue input pin.
+ *
+ * Check errors with @see neo_api_error
+ */
+uint16_t neo_uext_analogue_read(uint8_t pin);
+
+/**
+ * @brief Query the I2C device status.
+ *
+ * Check errors with @see neo_api_error
+ *
+ * @return Non-zero if present.
+ */
+uint8_t neo_uext_i2c_status(uint8_t device);
+
+/**
+ * @brief Read a block from an I2C device.
+ *
+ * Check errors with @see neo_api_error
+ */
+void neo_uext_i2c_block_read(uint8_t device, void *dest, uint16_t len);
+
+/**
+ * @brief Write a block to an I2C device.
+ *
+ * Check errors with @see neo_api_error
+ */
+void neo_uext_i2c_block_write(uint8_t device, const void *src, uint16_t len);
+
+/**
+ * @brief Read a block from an SPI device.
+ *
+ * Check errors with @see neo_api_error
+ */
+void neo_uext_spi_block_read(uint8_t device, void *dest, uint16_t len);
+
+/**
+ * @brief Write a block to an SPI device.
+ *
+ * Check errors with @see neo_api_error
+ */
+void neo_uext_spi_block_write(uint8_t device, const void *src, uint16_t len);
+
+/**
+ * @brief Read a block from an UART device.
+ *
+ * Check errors with @see neo_api_error
+ */
+void neo_uext_uart_block_read(uint8_t device, void *dest, uint16_t len);
+
+/**
+ * @brief Write a block to an UART device.
+ *
+ * Check errors with @see neo_api_error
+ */
+void neo_uext_uart_block_write(uint8_t device, const void *src, uint16_t len);
+
+#define NEO_UART_PROTOCOL_8N1 0
+
+/**
+ * @brief Configure the UART baud rate and protocol.
+ */
+void neo_uext_uart_configure(uint32_t baudrate, uint8_t protocol);
+
+/**
+ * @brief Write a byte to UART.
+ */
+void neo_uext_uart_write(uint8_t value);
+
+/**
+ * @brief Read a byte from UART.
+ */
+uint8_t neo_uext_uart_read(void);
+
+/**
+ * @brief Check if a byte can be read from UART.
+ */
+bool neo_uext_uart_available(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
