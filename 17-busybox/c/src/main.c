@@ -19,6 +19,7 @@
 #include <neo/console.h>
 #include <neo/file.h>
 #include <neo/sprites.h>
+#include <neo/sound.h>
 
 // local-API-support files (copy them here)
 // if these API updated get incorporated into the
@@ -101,7 +102,7 @@ void update_status(char *s) {
 void update_score() {
   neo_console_set_text_color(5,7); // magenta on white
   neo_console_set_cursor_pos(0,g_csh-1);
-  printf("SCORE: %d",g_score);
+  printf("SCORE: %lu",g_score);
   }
 
 void initialize(void) {
@@ -167,6 +168,7 @@ int main(void) {
       neo_graphics_set_color(c);
       neo_graphics_draw_rectangle(x1,y1,x2,y2);
       update_status("RECT");
+      neo_sound_play_effect(0,23);
       }
 
     // somewhat more frequently, move the sprite, bouncingly 
@@ -179,10 +181,12 @@ int main(void) {
       // x bounce?
       if (g_sprx > SC_W - SPRITE_SZ/2) {
         update_status("BOUNCE");
+        neo_sound_play_effect(0,6);
         g_sprx = SC_W - SPRITE_SZ/2; 
         g_vsprx *= -1;
         } else if (g_sprx < SPRITE_SZ/2) {
         update_status("BOUNCE");
+        neo_sound_play_effect(0,6);
         g_sprx = SPRITE_SZ/2; 
         g_vsprx *= -1;
         }
@@ -190,10 +194,12 @@ int main(void) {
       // y bounce?
       if (g_spry > SC_H - SPRITE_SZ/2) {
         update_status("BOUNCE");
+        neo_sound_play_effect(0,6);
         g_spry = SC_H - SPRITE_SZ/2; 
         g_vspry *= -1;
         } else if (g_spry < SPRITE_SZ/2) {
         update_status("BOUNCE");
+        neo_sound_play_effect(0,6);
         g_spry = SPRITE_SZ/2; 
         g_vspry *= -1;
         }
@@ -247,6 +253,7 @@ int main(void) {
           ((g_mousey >= g_spry - SPRITE_SZ/2) &&
            (g_mousey <= g_spry + SPRITE_SZ/2) && (!wasPressed) )) {
         update_status("PEW PEW");
+        neo_sound_play_effect(0,8);
         g_score += 1;
         wasPressed = TRUE; // we got our point. No more until we release button
         }
