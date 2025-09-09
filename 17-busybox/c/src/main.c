@@ -68,7 +68,7 @@
 #define C_A 0x01
 #define CI (C_A)
 
-#define GFX_FILE_NAME "sprite.gfx"
+#define GFX_FILE_NAME "17sprite.gfx"
 
 // sprite numbers start at 1 (turtle owns 0)
 #define SPRITE_NUMBER 1
@@ -168,7 +168,7 @@ int main(void) {
       neo_graphics_set_color(c);
       neo_graphics_draw_rectangle(x1,y1,x2,y2);
       update_status("RECT");
-      neo_sound_play_effect(0,23);
+      neo_sound_play_effect(0,22);
       }
 
     // somewhat more frequently, move the sprite, bouncingly 
@@ -228,9 +228,9 @@ int main(void) {
     uint16_t newx=g_mousex,newy=g_mousey;
     // if dpad buttons pushed, update coords but clamp them to the visible area
     if (dpad & DP_L) newx = MAX(0,newx-1); 
-    if (dpad & DP_R) newx = MIN(0,newx+1); 
+    if (dpad & DP_R) newx = MIN(SC_W-1,newx+1); 
     if (dpad & DP_U) newy = MAX(0,newy-1); 
-    if (dpad & DP_D) newy = MIN(0,newy+1); 
+    if (dpad & DP_D) newy = MIN(SC_H-1,newy+1); 
     if (newx != g_mousex) {
       update_status("DPADX");
       g_mousex = newx;
@@ -239,6 +239,7 @@ int main(void) {
       update_status("DPADY");
       g_mousey = newy;
       }
+
     // move the pointer for reals
     neo_mouse_move_display_cursor(g_mousex,g_mousey);
 
@@ -262,6 +263,25 @@ int main(void) {
       wasPressed = FALSE;
       }
 
+    
+    char c = neo_console_read_char();
+    if ((c>=0x20) && (c<=0x7F)) { // only handle "standard ASCII" chars
+      // go to random character pos on screen
+      uint8_t x = neo_math_random_integer(g_csw);
+      uint8_t y = neo_math_random_integer(g_csh-1); // avoid bottom row
+      neo_console_set_cursor_pos(x,y);
+      // generate random printable char and random fg/bg colors
+      uint8_t fg = 1 + neo_math_random_integer(15);
+      uint8_t bg=fg;
+      // make bg and fg colors differ.
+      while (bg == fg) bg = 1 + neo_math_random_integer(15);
+      update_status("CLACK");
+      neo_sound_play_effect(0,23);
+      neo_console_set_cursor_pos(x,y);
+      neo_console_set_text_color(fg,bg);
+      neo_console_write_char(c);
+      }
+    
     uint32_t fc = neo_graphics_frame_count();
     while (fc == neo_graphics_frame_count()) /* wait */ ;
     }

@@ -28,7 +28,7 @@ run: all
 	@echo "Launching emulator..."
 	mkdir -p storage
 	cp bin/$(NAME).neo storage
-	cp sprite.gfx storage
+	cp 17sprite.gfx storage
 	$(NEOEMU) bin/$(NAME).neo
-	rm -rf storage
+	# rm -rf storage
 	rm memory.dump

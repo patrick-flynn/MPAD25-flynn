@@ -31,7 +31,7 @@ for row in range(5,11):
 
 data = bytes(data)
 
-with open('sprite.gfx','wb') as f:
+with open('17sprite.gfx','wb') as f:
   f.write(gfx)
   f.write(pad)
   f.write(data)
