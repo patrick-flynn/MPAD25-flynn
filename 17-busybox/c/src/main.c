@@ -135,7 +135,9 @@ void initialize(void) {
   neo_console_screen_size(&g_csw,&g_csh);
   neo_console_set_cursor_pos(0,0);
 
-  update_status("READY");
+  char msg[16];
+  sprintf(msg,"READY %2dx%2d",g_csh,g_csw);
+  update_status(msg);
   return;
   }
 
@@ -148,7 +150,7 @@ int main(void) {
   // THE GAME LOOP
   while (1==1) {
 
-    update_status((char *)0);
+    //update_status((char *)0);
     update_score();
 
     // DO THINGS AND DRAW THINGS

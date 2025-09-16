@@ -10,6 +10,9 @@ SRCS = main.c mouse.c controller.c math.c
 
 default: all
 
+# fix up python for gfx file!
+
+
 all:
 	@echo "Building project..."
 	mkdir -p bin

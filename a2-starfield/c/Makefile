@@ -2,7 +2,7 @@
 # Makefile Options
 # ----------------------------
 
-NAME       = 10-tilemap
+NAME       = a2-starfield
 CC         = mos-neo6502-clang
 NEOEMU     = neo
 
@@ -10,7 +10,6 @@ default: all
 
 all:
 	@echo "Building project..."
-	python3 makegfx.py
 	mkdir -p bin
 	$(CC) -Os -o bin/$(NAME).neo src/main.c
 	rm bin/$(NAME).neo.elf
@@ -27,15 +26,6 @@ run: all
 	@echo "Launching emulator..."
 	mkdir -p storage
 	cp bin/$(NAME).neo storage
-	cp tileset.gfx storage
 	$(NEOEMU) bin/$(NAME).neo
-	rm -rf storage
-	rm memory.dump
-
-runcold: all
-	@echo "Launching emulator..."
-	mkdir -p storage
-	cp bin/$(NAME).neo storage
-	$(NEOEMU) bin/$(NAME).neo cold
 	rm -rf storage
 	rm memory.dump
