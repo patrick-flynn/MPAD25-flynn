@@ -1,5 +1,5 @@
 /* 
-/ Title: 14-spaceship
+/ Title: 22-steerablespaceship
 /
 / Description: steer a spaceship around the screen
 /
@@ -12,6 +12,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <kernel.h>
 #include <neo6502.h>
 #include <neo/graphics.h>
@@ -69,14 +70,27 @@ int main(int argc,char *argv[]) {
 	        if (dpad & DP_R) x = MIN(x+1,SC_W-SW/2);
 	        if (dpad & DP_U) y = MAX(y-1,SH/2);
 	        if (dpad & DP_D) y = MIN(y+1,SC_H-SH/2);	
-	  	}
+                switch(dpad) {
+                  case 0: break;
+                  case 1: spid = 2; break;
+                  case 2: spid = 6; break;
+                  case 4: spid = 0; break;
+                  case 5: spid = 1; break;
+                  case 6: spid = 7; break;
+                  case 8: spid = 4; break;
+                  case 9: spid = 3; break;
+                  case 0xa: spid=5; break;
+                  default: {
+                    printf("Error: invalid dpad value 0x%01xn",dpad);
+                    exit(-1);
+                    }
+                  }
+                }
           neo_sprite_set(1, x, y, ((SPRITE_ID_BASE+spid) & 0x7F),0,0);
           wait_frame();
-          uint8_t fc;
-          if ((fc = neo_graphics_frame_count() % 60) == 0) {
-		spid = (spid+1) % 16;
-                neo_console_set_cursor_pos(0,0);
-                printf("spid: %02d",spid);
-		}
+          neo_console_set_cursor_pos(0,0);
+          printf("spid: %02d",spid);
+          if ((neo_graphics_frame_count() & 0x40) == 0)
+           spid = spid ^ 0x8;
 	}
 }
