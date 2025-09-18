@@ -2,9 +2,10 @@
 # Makefile Options
 # ----------------------------
 
-NAME       = 13-thing
+NAME       = 20-imagebkgnd
 CC         = mos-neo6502-clang
 NEOEMU     = neo
+AUXFILES   = imgbytes.bin imgpalette.bin
 
 default: all
 
@@ -26,6 +27,7 @@ run: all
 	@echo "Launching emulator..."
 	mkdir -p storage
 	cp bin/$(NAME).neo storage
+	cp $(AUXFILES) storage
 	$(NEOEMU) bin/$(NAME).neo
 	rm -rf storage
 	rm memory.dump

@@ -19,14 +19,15 @@
 #include <neo/file.h>
 #include <neo/sprites.h>
 #include <neo/controller.h>
+#include <neo/console.h>
 
 // screen width (X) and height (Y)
 #define SC_W 320
 #define SC_H 240
 
 // sprite width & height
-#define SW 32
-#define SH 32
+#define SW 16
+#define SH 16
 
 #define GFX_FILE_NAME "spriteset.gfx"
 
@@ -41,8 +42,8 @@
 #define MAX(x,y) ((x)>(y))?(x):(y)
 #define MIN(x,y) ((x)<(y))?(x):(y)
 
-// "position" of sprite in gfx (32x32 sprites start at C0)
-#define SPRITE_ID_BASE 0xC0
+// "position" of sprite in gfx (16x16 sprites start at 80; 32x32 at C0)
+#define SPRITE_ID_BASE 0x80
 
 void wait_frame(void) {
   // wait for the "number of frames drawn (i.e., screen updates)" to increment
@@ -53,6 +54,7 @@ void wait_frame(void) {
 
 int main(int argc,char *argv[]) {
  uint16_t x=SC_W/2, y=SC_H/2; // pos of sprite
+ uint8_t spid = 0; // the sprite to display.
 
   // load sprite
   neo_file_load(GFX_FILE_NAME,NEO_FILE_DESTINATION_GRAPHICS);
@@ -66,9 +68,17 @@ int main(int argc,char *argv[]) {
 	        if (dpad & DP_R) x = MIN(x+1,SC_W-SW/2);
 	        if (dpad & DP_U) y = MAX(y-1,SH/2);
 	        if (dpad & DP_D) y = MIN(y+1,SC_H-SH/2);	
-          	neo_sprite_set(1, x, y, ((SPRITE_ID_BASE+1) & 0x7F),0,0);
-          	wait_frame();
-	  }
-  }
+	  	}
+          neo_sprite_set(1, x, y, ((SPRITE_ID_BASE+spid) & 0x7F),0,0);
+          neo_sprite_set(2, SC_W-x, SC_H-y, ((SPRITE_ID_BASE+spid) & 0x7F),0,0);
+          neo_sprite_set(3, SC_W-x, y, ((SPRITE_ID_BASE+spid) & 0x7F),0,0);
+          neo_sprite_set(4, x, SC_H-y, ((SPRITE_ID_BASE+spid) & 0x7F),0,0);
+          wait_frame();
+          uint8_t fc;
+          if ((fc = neo_graphics_frame_count() % 60) == 0) {
+		spid = (spid+1) % 16;
+                neo_console_set_cursor_pos(0,0);
+                printf("spid: %02d",spid);
+		}
+	}
 }
-

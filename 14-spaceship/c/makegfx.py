@@ -2,58 +2,104 @@
 
 from PIL import Image
 import struct
+import operator
+import functools
 
-# this script creates a gfx file of 18 32x32 sprites from a sprite sheet
-# (original at https://opengameart.org/content/spaceship-360). Although
-# the spreitesheet contains 108 rotated versions of the ship, we only need
-# the first 90 degrees of rotation because we can flip the sprited horizontally
-# and vertically.
+sheetname = 'Arcade - Bosconian - Player & Enemy Ships.png'
 
-sheetname = 'ship360_32.png'
+# this sheet is 116 columns, 176 pixels:
+# One row of 7 16x16 sprites: six ships and a kaboom
+# One row of three 32x32 kabooms 
+# seven rows of seven enemy ships each (different type per row)
+# One row of three 16x16 kabooms 
 
 gfx_header_fmt = '<BBBB'
+pad = [[0]*252]
 
 NTILE=0
-NSPRITE16=0
-NSPRITE32=18
+NSPRITE16=16
+NSPRITE32=0
 
 tileset = Image.open(sheetname).transpose(Image.Transpose.TRANSPOSE)
 pixels = tileset.load()
 w,h = tileset.size
-assert (h == 32*6) and (w==32*12), f"Image size {tileset.size} not correct."
+print(f'tileset is {tileset.size}')
 
-SSIZE=32
+# output sprite size
+SSIZE=16
+
+# input sprite size as multiple of SSIZE
+SCALE=1
 
 outpix = []
 
-for tx in range(3):
-  for ty in range(6):
-    cropbox = (tx*SSIZE, ty*SSIZE, (tx+1)*SSIZE, (ty+1)*SSIZE)
+tiles = []
+
+# starting with the corners of the desired sprites, clip them out.
+for (ty,tx) in [[0,0],[1,0],[2,0],[3,0],[4,0],[5,0]]:
+    cropbox = (tx*SSIZE*SCALE, ty*SSIZE*SCALE, (tx+1)*SSIZE*SCALE, (ty+1)*SSIZE*SCALE)
     tile = tileset.crop(cropbox)
     tile.save(f'tile_{tx}_{ty}.png')
-    for x in range(tx*SSIZE,(tx+1)*SSIZE):
-      for y in range(ty*SSIZE, (ty+1)*SSIZE):
-        pix = pixels[x,y]
-        #print(f'({x},{y}) = {pix}')
-        if (pix == (0,0,0,0)) or (pix[3]<255):
-          outpix.append(0)
-        else:
-          outpix.append(0x2) # red *shrug*
+    tiles.append(tile)
 
-print(f'{len(outpix)} output pixels')
-outbyte = []
-for (p1,p2) in zip(outpix[::2],outpix[1::2]):  # :-P
-  b = (p1<<4) | p2
-  outbyte.append(b)
+# ok, the tiles, in order, are
+# - N (engines firing)
+# - N
+# - NW (firing)
+# - NW
+# - W (firing)
+# - W
+# from these, we make all of the others
+# the specs below are a triplet [sprite-number, flipLR, flipUD]
 
-print(f'{len(outbyte)} output bytes')
+specs = [[0,False, False],[2,False,False],[4,False,False],[2,True,False],
+         [0,True,False],[2,True,True],[4,False,True],[2,False,True]]
+
+fulltiles = []
+
+# the engines-firing sprites, CCW in 45 degree steps starting at N
+for s in specs:
+    t = tiles[s[0]]
+    if s[1]: t = t.transpose(Image.FLIP_LEFT_RIGHT)
+    if s[2]: t = t.transpose(Image.FLIP_TOP_BOTTOM)
+    fulltiles.append(t)
+
+# the engines-off sprites, same orientations
+for s in specs:
+    t = tiles[s[0]+1]
+    if s[1]: t = t.transpose(Image.FLIP_LEFT_RIGHT)
+    if s[2]: t = t.transpose(Image.FLIP_TOP_BOTTOM)
+    fulltiles.append(t)
+
+
+def to_neotile(t):
+  """convert the PIL image to a neo6502 tile with the default palette."""
+  colormap = [[(0,0,0),0],[(255,0,0),1],[(151, 151, 151),9],[(222,222,222),15]]
+  nybbles = []
+  outbytes = []
+  px = t.load()
+  for x in range(t.size[0]):
+    for y in range(t.size[1]):
+      for m in colormap:
+        if px[x,y] == m[0]:
+          nybbles.append(m[1])
+  es = t.size[0]*t.size[1] # lol, always constant
+  assert len(nybbles) == es, f'Error: expected {es} nybbles, got {len(nybbles)}'
+  # nybbles contains 4-bit ints: pack successive pairs into 8-bit ints.
+  for (p1,p2) in zip(nybbles[::2],nybbles[1::2]):  # :-P
+    outbytes.append((p1<<4)|p2)
+  return outbytes
+
+ob = []
+for f in fulltiles:
+  ob += to_neotile(f)
+
+print(f'{len(ob)} output bytes')
 gfx = struct.pack(gfx_header_fmt,1,NTILE,NSPRITE16,NSPRITE32)
 pad = bytes([0]*252)
-
-
-data = bytes(outbyte)
+outbytes = bytes(ob)
 
 with open('spriteset.gfx','wb') as f:
   f.write(gfx)
   f.write(pad)
-  f.write(data)
+  f.write(outbytes)
