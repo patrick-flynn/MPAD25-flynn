@@ -2,7 +2,7 @@
 # Makefile Options
 # ----------------------------
 
-NAME       = 18-palette
+NAME       = 20-palette
 CC         = mos-neo6502-clang
 NEOEMU     = neo
 
