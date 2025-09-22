@@ -2,7 +2,7 @@
 # Makefile Options
 # ----------------------------
 
-NAME       = 14-spaceship
+NAME       = 22-steerablespaceship
 CC         = mos-neo6502-clang
 NEOEMU     = neo
 SRCS       = src/main.c src/math.c
