@@ -13,6 +13,8 @@
 #include <neo/console.h>
 #include <neo/file.h>
 
+#include "blitter.h"
+
 #define SC_W 320
 #define SC_H 240
 
@@ -23,21 +25,10 @@
 #define FALSE (0==1)
 
 uint8_t img_bytes[22500]; // 150x150 dome
-
-typedef struct _c_blit_rect_data {
-  uint16_t addr;
-  uint8_t sec_page;
-  uint8_t pad;
-  uint16_t stride;
-  } blit_rect_data_t;
-
-blit_rect_data_t brdSrc = {img_bytes,, brdDst;
-
-MOO
   
 int main(void) {
-	uint16_t i,j;
-
+    uint16_t i,j;
+    blit_complex_rect brdSrc = {0x00,img_bytes,0x00,IMG_W,0,0,0,IMG_H,IMG_W};
     neo_file_open(1,"imgpalette.bin",NEO_FILE_READ);
     for(i=0;i<240;i++) {
       uint8_t pe[3];
@@ -48,4 +39,7 @@ int main(void) {
 
     neo_file_load("imgbytes.bin",img_bytes);
 
-    neo_blit_complex_copy(0,img_bytes,
+    neo_blitter_image(NEO_BLITTER_ACTION_COPY,&brdSrc,10,10,0);
+   
+    while (1==1);
+}

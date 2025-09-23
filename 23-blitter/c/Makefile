@@ -5,6 +5,7 @@
 NAME       = 20-imagebkgnd
 CC         = mos-neo6502-clang
 NEOEMU     = neo
+SRCFILES   = src/main.c src/blitter.c
 AUXFILES   = imgbytes.bin imgpalette.bin
 
 default: all
@@ -12,7 +13,7 @@ default: all
 all:
 	@echo "Building project..."
 	mkdir -p bin
-	$(CC) -Os -o bin/$(NAME).neo src/main.c
+	$(CC) -Os -o bin/$(NAME).neo $(SRCFILES)
 	rm bin/$(NAME).neo.elf
 
 clean:
