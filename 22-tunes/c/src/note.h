@@ -1,12 +1,21 @@
 #ifndef _NOTE_H
 #define _NOTE_H
 
-typedef struct _note {
+typedef struct _pitch {
   char name[4];
   uint16_t pitch;
+  } pitch_t;
+
+typedef struct _note {
+  uint16_t pitch;
+  uint32_t start_time;
+  uint8_t velocity;
+  uint16_t duration;
+  uint16_t tempo;
+  uint8_t channel;
   } note_t;
 
-note_t note[] = {
+pitch_t pitch[] = {
 {"C0",0x0010},
 {"C#0",0x0011},
 {"D-0",0x0011},

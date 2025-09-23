@@ -4,7 +4,7 @@
  * Date: 22-Sep-2025
  *
  * this file reads a palette from imgpalette.bin (240 rgb entries)
- * and 320x240 pixels (palette indices) from imgbytes.bin
+ * and 128x128 pixels (palette indices) from imgbytes.bin
  * and splats the background image onto the screen using the blitter.
  */
 
@@ -18,13 +18,13 @@
 #define SC_W 320
 #define SC_H 240
 
-#define IMG_H 150
-#define IMG_W 150
+#define IMG_H 128
+#define IMG_W 128
 
 #define TRUE (0==0)
 #define FALSE (0==1)
 
-uint8_t img_bytes[22500]; // 150x150 dome
+uint8_t img_bytes[IMG_W*IMG_H];
   
 int main(void) {
     uint16_t i,j;

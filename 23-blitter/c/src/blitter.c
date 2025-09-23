@@ -23,10 +23,10 @@ void neo_blitter_simple_copy(uint8_t src_bank, uint8_t *src_addr,
                              uint8_t dst_bank, uint8_t *dst_addr,
                              uint16_t n_bytes) {
   ControlPort.params[0] = src_bank;
-  *((volatile uint8_t *)(&ControlPort.params[1])) = (volatile uint8_t *)src_addr;
+  *((volatile uint16_t *)(ControlPort.params+1)) = (uint16_t)src_addr;
   ControlPort.params[3] = dst_bank;
-  *((volatile uint8_t *)(&ControlPort.params[4])) = (volatile uint8_t *)dst_addr;
-  *((volatile uint16_t)(&ControlPort.params[6])) = (volatile uint16_t)n_bytes;
+  *((volatile uint16_t *)(ControlPort.params+4)) = (uint16_t)dst_addr;
+  *((volatile uint16_t *)(ControlPort.params+6)) = (uint16_t)n_bytes;
   KSendMessageSync(API_GROUP_BLITTER,API_FN_BLITTER_SIMPLE_COPY); 
   return;
   }
@@ -36,8 +36,8 @@ void neo_blitter_simple_copy(uint8_t src_bank, uint8_t *src_addr,
 void neo_blitter_complex_copy(uint8_t action, blit_complex_rect *src_rect,
                               blit_complex_rect *dst_rect) {
   ControlPort.params[0] = action;
-  *((volatile blit_complex_rect *)(&ControlPort.params[1])) = (volatile blit_complex_rect *)src_rect;
-  *((volatile blit_complex_rect *)(&ControlPort.params[3])) =(volatile blit_complex_rect *) dst_rect;
+  *((volatile uint16_t *)(ControlPort.params+1)) = (uint16_t)src_rect;
+  *((volatile uint16_t *)(&ControlPort.params+3)) =(uint16_t) dst_rect;
   KSendMessageSync(API_GROUP_BLITTER,API_FN_BLITTER_COMPLEX_COPY); 
   return;
   }
@@ -46,9 +46,9 @@ void neo_blitter_complex_copy(uint8_t action, blit_complex_rect *src_rect,
 void neo_blitter_image(uint8_t action, blit_complex_rect *src_rect,
                        int16_t x, int16_t y, uint8_t format) {
   ControlPort.params[0] = action;
-  *((volatile blit_complex_rect *)(&ControlPort.params[1])) = (volatile blit_complex_rect *)src_rect;
-  *((volatile int16_t *)(&ControlPort.params[3])) = (volatile int16_t)x;
-  *((volatile int16_t *)(&ControlPort.params[5])) = (volatile int16_t)y;
+  *((volatile uint16_t *)(&ControlPort.params[1])) = (uint16_t)src_rect;
+  *((volatile uint16_t *)(&ControlPort.params[3])) = (uint16_t)x;
+  *((volatile uint16_t *)(&ControlPort.params[5])) = (uint16_t)y;
   ControlPort.params[7] = format;
   KSendMessageSync(API_GROUP_BLITTER,API_FN_BLITTER_IMAGE); 
   return;
