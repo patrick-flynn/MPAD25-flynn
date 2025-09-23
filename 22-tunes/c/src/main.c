@@ -88,7 +88,7 @@ int main(void) {
       p = strtok(NULL,","); // start time
       printf("start %s\n",p);
       sscanf(p,"%d",&st);
-      song[n_notes].start_time = st;
+      song[n_notes].start_time = st/4;
       p = strtok(NULL,","); // duration
       printf("duration %s\n",p);
       sscanf(p,"%d",&dur);
