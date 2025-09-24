@@ -9,9 +9,11 @@ typedef struct _pitch {
 typedef struct _note {
   uint16_t pitch;
   uint32_t start_time;
-  uint16_t duration;
-  uint8_t channel;
+  uint32_t duration;
+  uint16_t channel;
   } note_t;
+
+#define PRINTNOTE(p) {printf("note %p: pitch 0x%04x, start %lu, duration %lu, channel %d\n",(p),(p)->pitch,(p)->start_time, (p)->duration, (p)->channel);}
 
 pitch_t pitch[] = {
 {"C0",0x0010},
