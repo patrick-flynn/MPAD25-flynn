@@ -2,18 +2,17 @@
 # Makefile Options
 # ----------------------------
 
-NAME       = 22-tunes
+NAME       = 25-randomredux
 CC         = mos-neo6502-clang
 NEOEMU     = neo
-AUXFILES   = rpgchip01_title_screen_converted.csv
-SRCFILES   = src/main.c src/math.c src/api-internal.c
+SRCS       = src/main.c src/math.c src/api-internal.c
 
 default: all
 
 all:
 	@echo "Building project..."
 	mkdir -p bin
-	$(CC) -Os -o bin/$(NAME).neo $(SRCFILES)
+	$(CC) -Os -o bin/$(NAME).neo $(SRCS)
 	rm bin/$(NAME).neo.elf
 
 clean:
@@ -28,7 +27,6 @@ run: all
 	@echo "Launching emulator..."
 	mkdir -p storage
 	cp bin/$(NAME).neo storage
-	cp $(AUXFILES) storage
 	$(NEOEMU) bin/$(NAME).neo
 	rm -rf storage
 	rm memory.dump

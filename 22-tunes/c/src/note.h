@@ -9,9 +9,7 @@ typedef struct _pitch {
 typedef struct _note {
   uint16_t pitch;
   uint32_t start_time;
-  uint8_t velocity;
   uint16_t duration;
-  uint16_t tempo;
   uint8_t channel;
   } note_t;
 
