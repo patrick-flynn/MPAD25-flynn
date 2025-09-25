@@ -126,7 +126,7 @@ int main(void) {
         song[n_notes].channel = ch++;
         if (ch>nchan) {
           printf("Error: ran out of channels!\n");
-          ch--; // barf
+          exit(-1);
           }
         }
       if (st < oldst) {
@@ -145,11 +145,34 @@ int main(void) {
     printf("Read %d lines, %d notes.\n",nl,n_notes);
 
     // the song is in memory (ick). Play it.
-    // the control algorithm is simple because the notes are sorted by start time, hopefully
-    // (XXX should check this!)
-    // we run the notes in order. If the start time is in the future, wait for it. if not, issue
-    // the note.
+    // this turns out to be a typical CS scheduling problem. You have 'nchannels' different
+    // note players, and want to schedule the notes to play on an open player, for the note's
+    // specified duration.
 
+    // the first thing to do is check feasibility (this is ideally done while reading the file,
+    // and indeed part of this IS done when reading, by barfing if there are > nchannels notes
+    // starting at the same time - but there are cases where N > nchannels
+    // notes start at different times, but all overlap in time -- not feasible, but also not
+    // detected with the static check above). 
+
+    // the idea here is to check each start time and find out how many notes are active at
+    // that time.
+
+    for(uint16_t i=0;i<n_notes;i++) {
+      uint32_t st = song[i].start_time;
+      uint16_t j;
+      if (i<n_notes-1) {
+        for(j=i+1;i<n_notes;j++)
+          if (song[j].start_time != st) break;
+        if (j<n_notes) { // multiple notes same start time. how many?
+          if ((j-i) > nchan) { // barf
+            printf("Error: notes %d to %d all have the same start time, only %d chans available\n",i,j,nchan);
+            exit(-1);
+            }
+          }
+        }
+      }
+        
     unsigned long t0 = neo_system_timer();
     uint16_t i;
 
