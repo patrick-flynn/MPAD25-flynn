@@ -47,7 +47,7 @@ uint16_t findpitch(char *nn) {
 note_t song[2000];
 uint16_t n_notes;
 
-void wait_for_time(unsigned long t) {
+void wait_for_time(long t) {
   while (neo_system_timer() < t) /* wait */ ;
   }
 
@@ -80,13 +80,17 @@ uint16_t str_to_int_x100(char *str) {
     }
   }
 
+#define FILENAME "g-minor-bach_converted.csv"
+//#define FILENAME "g-minor-bach_converted.csv"
+//#define FILENAME "prelude-i-in-c-major-bwv-846-well-tempered-clavier-first-book_converted.csv"
+//#define FILENAME "rpgchip01_title_screen_converted.csv"
   
 int main(void) {
     uint8_t err;
     uint16_t nl=0;
     uint16_t nchan = neo_sound_channel_count();
 
-    neo_file_open(1,"rpgchip01_title_screen_converted.csv",NEO_FILE_READ);
+    neo_file_open(1,FILENAME,NEO_FILE_READ);
     if ((err=neo_api_error())) {
       printf("neo_file_open(): error %d\n",err);
       exit(-1);
@@ -123,20 +127,21 @@ int main(void) {
       p = strtok(NULL,",\n\r"); // time
       song[n_notes].start_time = st = str_to_int_x100(p);
       if (st == oldst) {
+        printf("add channel %d at t=%lu\n",ch,st);
         song[n_notes].channel = ch++;
         if (ch>nchan) {
           printf("Error: ran out of channels!\n");
-          exit(-1);
+          continue;//exit(-1);
           }
+        }
+      else if (st > oldst) {
+        oldst = st;
+        ch = 0;
+        song[n_notes].channel = ch++;
         }
       if (st < oldst) {
         printf("ERROR: song notes not sorted by time.\n");
         exit(-1);
-        }
-      if (st > oldst) {
-        oldst = st;
-        ch = 0;
-        song[n_notes].channel = ch;
         }
       PRINTNOTE(&song[n_notes]);
       WAITKEY;
@@ -145,38 +150,17 @@ int main(void) {
     printf("Read %d lines, %d notes.\n",nl,n_notes);
 
     // the song is in memory (ick). Play it.
-    // this turns out to be a typical CS scheduling problem. You have 'nchannels' different
+    // In general, this is rather complicated!
+    // You have 'nchannels' different
     // note players, and want to schedule the notes to play on an open player, for the note's
     // specified duration.
 
-    // the first thing to do is check feasibility (this is ideally done while reading the file,
-    // and indeed part of this IS done when reading, by barfing if there are > nchannels notes
-    // starting at the same time - but there are cases where N > nchannels
-    // notes start at different times, but all overlap in time -- not feasible, but also not
-    // detected with the static check above). 
+    // for now, I assume that the notes are sorted in time and that no more than 'nchannels'
+    // different notes will be played at any one time.
 
-    // the idea here is to check each start time and find out how many notes are active at
-    // that time.
+    long t0 = neo_system_timer();
 
-    for(uint16_t i=0;i<n_notes;i++) {
-      uint32_t st = song[i].start_time;
-      uint16_t j;
-      if (i<n_notes-1) {
-        for(j=i+1;i<n_notes;j++)
-          if (song[j].start_time != st) break;
-        if (j<n_notes) { // multiple notes same start time. how many?
-          if ((j-i) > nchan) { // barf
-            printf("Error: notes %d to %d all have the same start time, only %d chans available\n",i,j,nchan);
-            exit(-1);
-            }
-          }
-        }
-      }
-        
-    unsigned long t0 = neo_system_timer();
-    uint16_t i;
-
-    for (i=0;i<n_notes;i++) {
+    for (uint16_t i=0;i<n_notes;i++) {
       note_t *p = &song[i];
       wait_for_time(t0+p->start_time);
       printf("queue "); PRINTNOTE(p);

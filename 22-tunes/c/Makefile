@@ -5,8 +5,9 @@
 NAME       = 22-tunes
 CC         = mos-neo6502-clang
 NEOEMU     = neo
-AUXFILES   = rpgchip01_title_screen_converted.csv
+AUXFILES   = g-minor-bach_converted.csv
 SRCFILES   = src/main.c src/math.c src/api-internal.c
+
 
 default: all
 
