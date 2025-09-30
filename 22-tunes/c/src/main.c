@@ -4,6 +4,11 @@
  * Date: 22-Sep-2025
  */
 
+// use this web app to create CSV files from MIDI files. Look at the output in a
+// spreadsheet to ensure that the notes are sorted in ascending order by start time (last column):
+// https://midi-to-csv.vercel.app/
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -166,4 +171,5 @@ int main(void) {
       printf("queue "); PRINTNOTE(p);
       neo_sound_queue((uint8_t)p->channel,(uint16_t)p->pitch,(uint16_t)p->duration,(uint16_t)0,(uint8_t)0);
       }
+    printf("DONE ISSUING SOUNDS!!!\n");
    } 
