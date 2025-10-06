@@ -2,7 +2,7 @@
 # Makefile Options
 # ----------------------------
 
-NAME       = 01-hello-world
+NAME       = 30-hello-world-redux
 CC         = mos-neo6502-clang
 NEOEMU     = neo
 

@@ -2,7 +2,7 @@
 # Makefile Options
 # ----------------------------
 
-NAME       = 01-hello-world
+NAME       = 31-hw-asm
 CC         = mos-neo6502-clang
 NEOEMU     = neo
 
@@ -13,9 +13,6 @@ all:
 	mkdir -p bin
 	$(CC) -Os -o bin/$(NAME).neo src/main.c
 	rm bin/$(NAME).neo.elf
-
-asm:
-	$(CC) -O0 -Wl,--lto-emit-asm  -o main.s src/main.c
 
 clean:
 	@echo "Cleaning project..."
@@ -29,6 +26,6 @@ run: all
 	@echo "Launching emulator..."
 	mkdir -p storage
 	cp bin/$(NAME).neo storage
-	$(NEOEMU) bin/$(NAME).neo cold
+	$(NEOEMU) bin/$(NAME).neo
 	rm -rf storage
 	rm memory.dump
