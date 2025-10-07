@@ -1,35 +1,41 @@
-        .segment "DATA"
-        .org    $0000
-        .asc    "Hello, world"
-        .byte   $00
-
         .org    $0800
-
-        .segment "CODE"
+        .section "CODE"
         .global main
-main:   lda     #$0c
-        sta     #$FF01
+main:   
 
-   //neo_console_clear_screen();
-   asm volatile("LDA #$0C"); // neo_console_clear_screen
-   asm volatile("STA #$FF01");
-   asm volatile("LDA #$02"); // console
-   asm volatile("STA #$FF00"); // off you go
-   asm volatile("JSR $FFF4"); // KWaitMessage
+	lda     #$0c	; neo_console_clear_screen
+        sta     $ff01
+	lda	#$02	; console group
+	sta	$ff00	; api call, go
 
-   //neo_console_set_cursor_pos(0,0);
-   asm volatile("STZ $FF04"); // (0,
-   asm volatile("STZ $FF05"); //    0)
-   asm volatile("LDA #$07");  // neo_console_set_cursor_pos
-   asm volatile("STA $FF01"); //    0)
-   asm volatile("LDA #$02"); // console
-   asm volatile("STA #$FF00"); // off you go
-   asm volatile("JSR $FFF4"); // KWaitMessage
+lp1:	lda	$ff00
+	bne	lp1
 
-   asm volatile("
-   //for (char *c="Hello, world!"; *c; c++) {
-     //neo_console_write_char(*c);
-     //}
-   //return 0;
+			; neo_console_set_cursor_pos(0,0)
+	stz	$ff04	;                           (0,
+	stz	$ff05	;                              0)
+	lda	#$07	; neo_console_set_cursor_pos
+	sta	$ff01
+	lda	#$02	; console group
+	sta	$ff00	; api call, go	
 
-}
+lp2:	lda	$ff00
+	bne	lp2
+
+chars:
+	ldx	#$00
+loop:	lda	str,x	; get char
+	beq	done	; null, we are finished
+	sta	$ff04
+	lda	#$06	; neo_console_write_char
+	sta	$ff01
+	lda	#$02	; console group
+	sta	$ff00	; api call, go	
+lp0:	lda	$ff00
+	bne	lp0
+	inx
+	jmp	loop
+
+done:	jmp	done
+
+str:	.ascii   "Hello, world!"

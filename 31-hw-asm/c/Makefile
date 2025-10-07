@@ -11,7 +11,7 @@ default: all
 all:
 	@echo "Building project..."
 	mkdir -p bin
-	$(CC) -Os -o bin/$(NAME).neo src/main.c
+	$(CC) -Os -o bin/$(NAME).neo src/main.s
 	rm bin/$(NAME).neo.elf
 
 clean:
