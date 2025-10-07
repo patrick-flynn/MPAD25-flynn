@@ -14,6 +14,9 @@ all:
 	$(CC) -Os -o bin/$(NAME).neo src/main.s
 	rm bin/$(NAME).neo.elf
 
+obj:
+	$(CC) -Os -c src/main.s
+
 clean:
 	@echo "Cleaning project..."
 	rm -rf bin
