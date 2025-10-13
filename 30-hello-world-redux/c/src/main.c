@@ -11,7 +11,6 @@
 / Modinfo:
 */
 
-//#include <stdio.h>
 #include <neo/console.h>
 
 int main(void) {
