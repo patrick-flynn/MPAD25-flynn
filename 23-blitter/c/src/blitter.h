@@ -24,8 +24,8 @@ extern "C" {
 
 // blitter data structures
 typedef struct _blit_complex_rect {
-  uint8_t page;
   uint8_t *addr;
+  uint8_t page;
   uint8_t pad; // MUST be zero
   uint16_t stride;
   uint8_t format;

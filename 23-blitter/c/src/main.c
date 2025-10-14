@@ -28,7 +28,7 @@ uint8_t img_bytes[IMG_W*IMG_H];
   
 int main(void) {
     uint16_t i,j;
-    blit_complex_rect brdSrc = {0x00,img_bytes,0x00,IMG_W,0,0,0,IMG_H,IMG_W};
+    blit_complex_rect brdSrc = {img_bytes,0x00,0x00,IMG_W,0,0,0,IMG_H,IMG_W};
     neo_file_open(1,"imgpalette.bin",NEO_FILE_READ);
     for(i=0;i<240;i++) {
       uint8_t pe[3];
