@@ -1,11 +1,15 @@
 /* 
-/ Title: 33-pixellife
+/ Title: 34-pixel-life-1dbufs
 /
 / Description: Pixel-based Conway's Life
 /
 / Author: PF
 /
 / Created: 10/13/25
+/
+/ This version is based on 33-pixel-life but works around the rather limited
+/ implementation of malloc, by telling the linker to ignmore memory above 0x8000
+/ and allocating the life buffers there as 1d items
 /
 */
 
@@ -32,23 +36,31 @@ uint8_t rule(uint8_t nn,uint8_t c) {
 
 typedef struct _board {
   int nr,nc; // nc is actual width in pixels
-  uint8_t **pix; // size of each row is nc/8 because pixels are packed
+  uint8_t *base; // base address
   } board;
 
-board *new_board(uint16_t nr, uint16_t nc) {
-  uint16_t i;
+board *new_board(uint16_t nr, uint16_t nc, uint8_t *base) {
   board *b = (board *)malloc(sizeof(board));
   b->nr=nr;
   b->nc=nc;
-  if (!b) { printf("ERROR: malloc(board)\n"); exit(0); }
-  b->pix = (uint8_t **)malloc(nr*sizeof(uint8_t *));
-  for(uint16_t i=0;i<nr;i++) {
-    b->pix[i] = (uint8_t *)malloc((nc>>3)*sizeof(uint8_t));
-    if (!b->pix[i]) { printf("ERROR: malloc(board[%d])\n",i); exit(0); }
-    }
+  b->base = base;
   return b;
   }
 
+// macro - get the value at pixel (zero or one)
+
+MMOOOOOO
+#define GETPIX(b,r,c) ((b)->base[(r)*((b)->nc >>3) + ((c) & 0x7)])
+ 
+// val is 1 or 0!
+void setpix(board *b,uint16_t r, uint16_t c, uint8_t val) {
+  uint8_t cur = GETPIX(b,r,c);
+  uint8_t msk = (0x80 >> (c & 0x7));
+  if (val) 
+    b->base[(r)*((b->nc)>>3) + (c&0x7)] |= msk; // set bit
+  else
+    b->base[(r)*((b->nc)>>3) + (c&0x7)] &= ~msk; // set bit
+  }
 
 // display the board
 // XXX this is SO SLOW
@@ -57,25 +69,10 @@ void disp(board *b) {
   for(uint16_t i=0;i<b->nr;i++) {
     for(uint16_t j=0;j<b->nc;j++) {
       uint8_t msk = (0x80) >> (j&0x7); // XXX
-      if ((b->pix[i][j>>3]) & msk) neo_graphics_draw_pixel(i,j); // XXX XXX
+      if ((b->base[i*(b->nc>>3) + (c >> 3)]) & msk) neo_graphics_draw_pixel(i,j); // XXX XXX
       }
     }
 }
-
-// macro - get the value at pixel (zero or one)
-#define GETPIX(b,r,c) (((b)->pix[(r)][(c) >> 3] & (0x80 >> ((c) & 0x7)))?1:0) 
- 
-
-// val is 1 or 0!
-void setpix(board *b,uint16_t r, uint16_t c, uint8_t val) {
-  uint8_t cur = GETPIX(b,r,c);
-  uint8_t msk = (0x80 >> (c & 0x7));
-  if (val) 
-    b->pix[r][c>>3] |= msk; // set the bit
-  else
-    b->pix[r][c>>3] &= ~msk; // clear the bit
-  }
-
 
 int main(void) {
   uint8_t nn;
