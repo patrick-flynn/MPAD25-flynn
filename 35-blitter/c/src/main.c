@@ -1,15 +1,11 @@
 /* 
-/ Title: 34-pixel-life-1dbufs
+/ Title: 35-blitter
 /
-/ Description: Pixel-based Conway's Life
+/ Description: Blitter test, again
 /
 / Author: PF
 /
-/ Created: 10/13/25
-/
-/ This version is based on 33-pixel-life but works around the rather limited
-/ implementation of malloc, by telling the linker to ignmore memory above 0x8000
-/ and allocating the life buffers there as 1d items
+/ Created: 10/15/25
 /
 */
 
@@ -22,7 +18,6 @@
 #include <neo/system.h>
 
 #include "math.h"
-#include "mouse.h"
 #include "blitter.h"
 
 #define SC_W 320
@@ -36,55 +31,30 @@ void wait_ticks(uint16_t nticks) {
   }
 
 
-// the rule for life at a cell in the next generation, based on its
-// state (alive/dead) in the current generation and the number of living
-// neighbors it has
-uint8_t rule(uint8_t nn,uint8_t c) {
-       return (c && ((nn==2)||(nn==3))) || (!c && (nn==3));
-}
+// a binary thang to blit - 16x16 target
+char img[32] = {0xff, 0xff,
+                0x80, 0x01,
+                0x80, 0x01,
+                0x80, 0x01,
+                0x8f, 0xf1,
+                0x8f, 0xf1,
+                0x8f, 0xf1,
+                0x8f, 0xf1,
+                0x8f, 0xf1,
+                0x8f, 0xf1,
+                0x8f, 0xf1,
+                0x8f, 0xf1,
+                0x80, 0x01,
+                0x80, 0x01,
+                0x80, 0x01,
+                0xff, 0xff };
+  
 
-typedef struct _board {
-  uint16_t nr,nc; // nc is actual width in pixels
-  uint8_t *base; // base address
-  } board;
+MOOOO 
 
-board *new_board(uint16_t nr, uint16_t nc, uint8_t *base) {
-  board *b = (board *)malloc(sizeof(board));
-  b->nr=nr;
-  b->nc=nc;
-  b->base = base;
-  return b;
-  }
-
-// macro - get the value at pixel (zero or one)
-
-#define GETPIX(b,r,c) (((b)->base[(r)*(((b)->nc) >>3) + ((c) >>3)] & (0x80 >> (c&0x07)))  ? 1:0)
- 
-// val is 1 or 0!
-void setpix(board *b,uint16_t r, uint16_t c, uint8_t val) {
-  uint8_t cur = GETPIX(b,r,c);
-  uint8_t msk = (0x80 >> (c & 0x7));
-  if (val) 
-    b->base[(r)*((b->nc)>>3) + (c>>3)] |= msk; // set bit
-  else
-    b->base[(r)*((b->nc)>>3) + (c>>3)] &= ~msk; // set bit
-  }
-
-// display the board
-// XXX this is SO SLOW
-//void disp(board *b) {
-  //neo_console_clear_screen();
-  //for(uint16_t i=0;i<b->nr;i++) {
-    //for(uint16_t j=0;j<b->nc;j++) {
-      //uint8_t msk = (0x80) >> (j&0x7); // XXX
-      //if GETPIX(b,i,j) neo_graphics_draw_pixel(i,j); // XXX XXX
-      //}
-    //}
-//}
-
-// display the board using the blitter - only works for 1D arrays
-void disp(board *b) {
-  blit_complex_rect rect_src = {b->base,0x0,0,(b->nc)>>3,2,0,1,b->nr,b->nc};
+// display the thang at (x,y)
+void disp(char *p, uint16_t x, uint16_t y) {
+  blit_complex_rect rect_src = {p,0x0,0,2,2,0,1,16,16};
   neo_blitter_image(NEO_BLITTER_ACTION_COPY,&rect_src,0,0,0);
   }
   
