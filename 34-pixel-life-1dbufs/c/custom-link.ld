@@ -5,10 +5,10 @@ __rc0 = 0x00;
 INCLUDE imag-regs.ld
 ASSERT(__rc31 == 0x001f, "Inconsistent zero page map.")
 
-/* reduce MEMTOP to 8000 */
+/* reduce MEMTOP to 6000 */
 MEMORY {
     zp : ORIGIN = __rc31 + 1, LENGTH = 0x100 - (__rc31 + 1)
-    ram (rw) : ORIGIN = 0x0200, LENGTH = 0x8000 - 0x0200
+    ram (rw) : ORIGIN = 0x0200, LENGTH = 0x6000 - 0x0200
 }
 
 REGION_ALIAS("c_readonly", ram)
@@ -25,7 +25,7 @@ SECTIONS {
 }
 
 /* Set initial soft stack address to just above last memory address. (It grows down.) */
-__stack = 0x8000;
+__stack = 0x6000;
 
 /*
  * .neo file format

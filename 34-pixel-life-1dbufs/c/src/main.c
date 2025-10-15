@@ -8,7 +8,7 @@
 / Created: 10/13/25
 /
 / This version is based on 33-pixel-life but works around the rather limited
-/ implementation of malloc, by telling the linker to ignmore memory above 0x8000
+/ implementation of malloc, by telling the linker to ignore memory above 0x8000
 / and allocating the life buffers there as 1d items
 /
 */
@@ -62,30 +62,28 @@ board *new_board(uint16_t nr, uint16_t nc, uint8_t *base) {
  
 // val is 1 or 0!
 void setpix(board *b,uint16_t r, uint16_t c, uint8_t val) {
-  uint8_t cur = GETPIX(b,r,c);
+  uint8_t *p = b->base + (r*(b->nc)>>3) + (c>>3); 
   uint8_t msk = (0x80 >> (c & 0x7));
   if (val) 
-    b->base[(r)*((b->nc)>>3) + (c>>3)] |= msk; // set bit
+    *p |= msk; // set bit
   else
-    b->base[(r)*((b->nc)>>3) + (c>>3)] &= ~msk; // set bit
+    *p &= ~msk; // clear bit
   }
 
-// display the board
-// XXX this is SO SLOW
-//void disp(board *b) {
-  //neo_console_clear_screen();
-  //for(uint16_t i=0;i<b->nr;i++) {
-    //for(uint16_t j=0;j<b->nc;j++) {
-      //uint8_t msk = (0x80) >> (j&0x7); // XXX
-      //if GETPIX(b,i,j) neo_graphics_draw_pixel(i,j); // XXX XXX
-      //}
-    //}
-//}
-
+void printboard(board *b) { printf("%drx%dc@%p",b->nr,b->nc,b->base); }
 // display the board using the blitter - only works for 1D arrays
+
 void disp(board *b) {
-  blit_complex_rect rect_src = {b->base,0x0,0,(b->nc)>>3,2,0,1,b->nr,b->nc};
+  blit_complex_rect rect_src = {b->base,0x0, /* addr and "page" (00 means RAM) */
+                                0, /* filler*/
+                                (b->nc)>>3, // stride between rows in src
+                                2, /* 8 1-bit pixels per byte */
+                                0,0, /* color specs for non-copy modes */
+                                b->nr,b->nc}; /* height and width in dst */
+
   neo_blitter_image(NEO_BLITTER_ACTION_COPY,&rect_src,0,0,0);
+  neo_console_set_cursor_pos(0,0);
+  printf("disp("); printboard(b); printf(")");
   }
   
   
@@ -96,14 +94,14 @@ int main(void) {
   uint16_t i,j;
   uint8_t im1,ip1,jm1,jp1;
   uint32_t t=0;
+  uint16_t h=SC_H/2, w=SC_W/2;
 
-  board *board1=new_board(SC_H/2,SC_W/2,(uint8_t *)0x8000);
-  board *board2=new_board(SC_H/2,SC_W/2,(uint8_t *)0xB000);
-  board *curboard=board1,*nextboard=board2;
+  board board1 = {h, w, (uint8_t*)0x8000};
+  board board2 = {h, w, (uint8_t*)0xA580}; /* 0x8000 + 9600 */
+  board *curboard=&board1,*nextboard=&board2;
   board *tmpboard;
 
   // seed the random number generator
-#if 0
   neo_console_set_cursor_pos(0,0);
   printf("Press any key.");
   while (!neo_console_read_char()) ; 
@@ -113,25 +111,10 @@ int main(void) {
     t += neo_math_random_integer(0x7fffffff);
     //printf("%d of %d\n",k,kmax);
     };
-#endif
 
+
+  /* we can only blit colors 0 and 1 - make sure 1 is white */
   neo_graphics_set_palette(1,255,255,255);
-
-
-  // FOR DEBUGGING
-  // clear the board
-  //for(i=0;i<curboard->nr;i++) {
-    //for(j=0;j<((curboard->nc) >> 3);j++) { // maybe unroll this
-      //curboard->pix[i][j]=0;
-      //}
-    //}
-
-  // plant a glider in the middle
-  //setpix(curboard,SC_H/8,SC_W/8,1);
-  //setpix(curboard,SC_H/8+1,SC_W/8+1,1);
-  //setpix(curboard,SC_H/8+1,SC_W/8+2,1);
-  //setpix(curboard,SC_H/8+2,SC_W/8,1);
-  //setpix(curboard,SC_H/8+2,SC_W/8+1,1);
 
   // randomize board
   ptr = curboard->base;
@@ -143,33 +126,23 @@ int main(void) {
 
   disp(curboard);
 
-  neo_console_set_cursor_pos(0,0);
-  printf("INITIAL BOARD");
-
-  KWaitMessage();
-
-  //neo_console_set_cursor_pos(0,0);
-  //printf("Flargin");
-
-  //wait_ticks(200);
-  while (1==1) ;
-
   while (1==1) { // XXX need a stop-detector
     for(i=0;i<curboard->nr;i++) {
-      neo_console_set_cursor_pos(0,0);
+      neo_console_set_cursor_pos(25,0);
       printf("row %d",i);
       im1 = (i-1) % curboard->nr;
       ip1 = (i+1) % curboard->nr;
       for(j=0;j<curboard->nc;j++) {
+        uint8_t live = GETPIX(curboard,i,j);
 	    jm1 = (j-1) % curboard->nc;
 	    jp1 = (j+1) % curboard->nc;
 	    nn = GETPIX(curboard,im1,jm1) + GETPIX(curboard,im1,j) + GETPIX(curboard,im1,jp1) + 
 	         GETPIX(curboard,i,jm1) + GETPIX(curboard,i,jp1) +
              GETPIX(curboard,ip1,jm1) + GETPIX(curboard,ip1,j) + GETPIX(curboard,ip1,jp1);
         //if (nn>0) {
-          //printf("%d %d: nn %d live %d\n",i,j,nn,GETPIX(curboard,i,j));
+          //printf("%d %d: nn %d live %d\n",i,j,nn,live);
           //};
-        setpix(nextboard,i,j,rule(nn,GETPIX(curboard,i,j) ? 1 : 0));
+        setpix(nextboard,i,j,rule(nn,live) ? 1 : 0);
 	    }
       }
     tmpboard = curboard;

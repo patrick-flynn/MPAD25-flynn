@@ -3,7 +3,7 @@
 # ----------------------------
 
 NAME       = 35-blitter
-CC         = mos-neo6502-clang -T custom-link.ld
+CC         = mos-neo6502-clang 
 NEOEMU     = neo
 SRCS       = src/main.c src/math.c src/blitter.c
 
