@@ -5,7 +5,7 @@
 NAME       = 34-pixel-life-1dbufs
 CC         = mos-neo6502-clang -T custom-link.ld
 NEOEMU     = neo
-SRCS       = src/main.c src/math.c src/mouse.c
+SRCS       = src/main.c src/math.c src/mouse.c src/blitter.c
 
 default: all
 
