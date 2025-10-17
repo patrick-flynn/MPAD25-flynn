@@ -1,15 +1,13 @@
 /* 
-/ Title: 34-pixel-life-1dbufs
+/ Title: 36-pixlife-more
 /
 / Description: Pixel-based Conway's Life
 /
 / Author: PF
 /
-/ Created: 10/13/25
+/ Created: 10/15/25
 /
-/ This version is based on 33-pixel-life but works around the rather limited
-/ implementation of malloc, by telling the linker to ignore memory above 0x8000
-/ and allocating the life buffers there as 1d items
+/ more optimization of Conway's life for the Neo.
 /
 */
 
@@ -86,7 +84,9 @@ void disp(board *b) {
   printf("disp("); printboard(b); printf(")");
   }
   
-  
+/* forward */
+void life(board *c,board *n); 
+
 
 int main(void) {
   uint8_t *ptr;
@@ -124,32 +124,33 @@ int main(void) {
       }
     }
 
-  disp(curboard);
 
   while (1==1) { // XXX need a stop-detector
-    for(i=0;i<curboard->nr;i++) {
-      neo_console_set_cursor_pos(25,0);
-      printf("row %d",i);
-      im1 = (i-1) % curboard->nr;
-      ip1 = (i+1) % curboard->nr;
-      for(j=0;j<curboard->nc;j++) {
-        uint8_t live = GETPIX(curboard,i,j);
-	    jm1 = (j-1) % curboard->nc;
-	    jp1 = (j+1) % curboard->nc;
-	    nn = GETPIX(curboard,im1,jm1) + GETPIX(curboard,im1,j) + GETPIX(curboard,im1,jp1) + 
-	         GETPIX(curboard,i,jm1) + GETPIX(curboard,i,jp1) +
-             GETPIX(curboard,ip1,jm1) + GETPIX(curboard,ip1,j) + GETPIX(curboard,ip1,jp1);
-        //if (nn>0) {
-          //printf("%d %d: nn %d live %d\n",i,j,nn,live);
-          //};
-        setpix(nextboard,i,j,rule(nn,live) ? 1 : 0);
-	    }
-      }
+    disp(curboard);
+    life(curboard,nextboard);
     tmpboard = curboard;
     curboard = nextboard;
     nextboard = tmpboard;
-    //while (1==1);
     disp(curboard);
     }
   return 0;
   }
+
+#define BPTR(b,i,j) ((b)->base + (i)*(((b)->nc)>>3) + (j)>>3)
+
+void life(board *curboard,board *nextboard) {
+  uint8_t *pm1m1,*pm10,*pm1p1,*p0m1,*p00,*p0p1,*pp1m1,*pp10,*pp1p1;
+  uint8_t live,nn,mskmp1m1,mskmp10, makmp1p1,
+  uint8_t msk0m1, msk00, msk0p1;
+  uint16_t i,j,nr=curboard->nr,nc=curboard->nc;
+
+  /* set up pointers for (0,0) */
+  pm1m1 = BPTR(nr-1,nc-1); pm10 = BPTR(nr-1,0); pm1p1 = pm10+1;
+  p0m1 = BPTR(0,nc-1); p00 = BPTR(0,0); p01 = p00+1;
+  pp1m1 = BPTR(1,nc-1); pp10 = BPTR(1,0); pp1p1 = pp10+1;
+
+  /* set up initial masks
+  mskmp1m1 = 0x01; mskmp10 = 0xC0; mskmp1p1=0x80;
+  msk0m1 = 0x01; msk00 = 0x40; msk0p1 = 0x80; 
+
+  for(i=0;i<nr;i++) {:
