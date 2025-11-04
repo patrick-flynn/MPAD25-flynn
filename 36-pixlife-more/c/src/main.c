@@ -8,6 +8,8 @@
 / Created: 10/15/25
 /
 / more optimization of Conway's life for the Neo.
+/ uses the blitter, ooh
+/ 8-bit batched updates using the 3x3 neighborhood of bytes 
 /
 */
 
@@ -26,20 +28,16 @@
 #define SC_W 320
 #define SC_H 240
 
-void wait_ticks(uint16_t nticks) {
-  while (nticks--) {
-    uint32_t t = neo_system_timer();
-    while (t == neo_system_timer()) ;
-    }
-  }
-
 
 // the rule for life at a cell in the next generation, based on its
 // state (alive/dead) in the current generation and the number of living
 // neighbors it has
-uint8_t rule(uint8_t nn,uint8_t c) {
-       return (c && ((nn==2)||(nn==3))) || (!c && (nn==3));
-}
+uint8_t ad[8][2] = { {0,0}, {0,0}, {0,1}, {1,1}, {0,0},{0,0},{0,0},{0,0}};
+#define RULE(nn,alive) ad[(nn)][(alive)]
+
+//uint8_t rule(uint8_t nn,uint8_t c) {
+       //return (c && ((nn==2)||(nn==3))) || (!c && (nn==3));
+//}
 
 typedef struct _board {
   uint16_t nr,nc; // nc is actual width in pixels
@@ -165,43 +163,43 @@ uint8_t calcng(uint8_t cm1m1, uint8_t cm10, uint8_t cm1p1,
        n1b[c0m1 & 0x01] + n1b[c00 & 0x40] +
        n1b[cp1m1 & 0x01] + n1b[cp10 & 0xC0];
   live = n1b[c00 & 0x80];
-  if (rule(nn,live)) res |= msk;
+  if (RULE(nn,live)) res |= msk;
   else res &= ~msk;
   msk >>= 1;
   /* bit 6 */
   nn = n1b[cm10 & 0xE0] + n1b[c00 & 0xA0] + n1b[cp10 & 0xE0];
   live = n1b[c00 & 0x40];
-  if (rule(nn,live)) res |= msk;
+  if (RULE(nn,live)) res |= msk;
   else res &= ~msk;
   msk >>= 1;
   /* bit 5 */
   nn = n1b[cm10 & 0x70] + n1b[c00 & 0x50] + n1b[cp10 & 0x70];
   live = n1b[c00 & 0x20];
-  if (rule(nn,live)) res |= msk;
+  if (RULE(nn,live)) res |= msk;
   else res &= ~msk;
   msk >>= 1;
   /* bit 4 */
   nn = n1b[cm10 & 0x38] + n1b[c00 & 0x28] + n1b[cp10 & 0x38];
   live = n1b[c00 & 0x10];
-  if (rule(nn,live)) res |= msk;
+  if (RULE(nn,live)) res |= msk;
   else res &= ~msk;
   msk >>= 1;
   /* bit 3 */
   nn = n1b[cm10 & 0x1C] + n1b[c00 & 0x14] + n1b[cp10 & 0x1C];
   live = n1b[c00 & 0x08];
-  if (rule(nn,live)) res |= msk;
+  if (RULE(nn,live)) res |= msk;
   else res &= ~msk;
   msk >>= 1;
   /* bit 2 */
   nn = n1b[cm10 & 0x0E] + n1b[c00 & 0x0A] + n1b[cp10 & 0x0E];
   live = n1b[c00 & 0x04];
-  if (rule(nn,live)) res |= msk;
+  if (RULE(nn,live)) res |= msk;
   else res &= ~msk;
   msk >>= 1;
   /* bit 1 */
   nn = n1b[cm10 & 0x07] + n1b[c00 & 0x05] + n1b[cp10 & 0x07];
   live = n1b[c00 & 0x02];
-  if (rule(nn,live)) res |= msk;
+  if (RULE(nn,live)) res |= msk;
   else res &= ~msk;
   msk >>= 1;
   /* bit 0 */
@@ -209,7 +207,7 @@ uint8_t calcng(uint8_t cm1m1, uint8_t cm10, uint8_t cm1p1,
        n1b[c00 & 0x02] + n1b[c0p1 & 0x80] +
        n1b[cp10 & 0x03] + n1b[cp1p1 & 0x80];
   live = n1b[c00 & 0x1];
-  if (rule(nn,live)) res |= msk;
+  if (RULE(nn,live)) res |= msk;
   else res &= ~msk;
   return res;
   }
