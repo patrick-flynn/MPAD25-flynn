@@ -87,14 +87,13 @@ void disp(board *b) {
 /* forward */
 void life(board *c,board *n); 
 
-
 int main(void) {
   uint8_t *ptr;
   uint8_t nn;
   uint16_t i,j;
   uint8_t im1,ip1,jm1,jp1;
   uint32_t t=0;
-  uint16_t h=SC_H/2, w=SC_W/2;
+  uint16_t h=SC_H, w=SC_W;
 
   board board1 = {h, w, (uint8_t*)0x8000};
   board board2 = {h, w, (uint8_t*)0xA580}; /* 0x8000 + 9600 */
@@ -136,21 +135,122 @@ int main(void) {
   return 0;
   }
 
-#define BPTR(b,i,j) ((b)->base + (i)*(((b)->nc)>>3) + (j)>>3)
+#define BPTR(b,i,j) ((b)->base + (i)*(((b)->nc)>>3) + ((j)>>3))
+
+uint8_t n1b[] = {0,1,1,2,1,2,2,3,1,2,2,3,2,3,3,4,  /* 0000 xxxx */
+                 1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,  /* 0001 xxxx */
+                 1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,  /* 0010 xxxx */
+                 2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,  /* 0011 xxxx */
+                 1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,  /* 0100 xxxx */
+                 2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,  /* 0101 xxxx */
+                 2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,  /* 0110 xxxx */
+                 3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,  /* 0111 xxxx */
+                 1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,  /* 1000 xxxx */
+                 2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,  /* 1001 xxxx */
+                 1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,  /* 1010 xxxx */
+                 3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,  /* 1011 xxxx */
+                 1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,  /* 1100 xxxx */
+                 3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,  /* 1101 xxxx */
+                 3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,  /* 1110 xxxx */
+                 4,5,5,6,5,6,6,7,5,6,6,7,6,7,7,8};  /* 1111 xxxx */
+
+/* calculate the next generation for a current generation 3x3 byte context */
+uint8_t calcng(uint8_t cm1m1, uint8_t cm10, uint8_t cm1p1,
+               uint8_t c0m1, uint8_t c00, uint8_t c0p1,
+               uint8_t cp1m1, uint8_t cp10, uint8_t cp1p1) {
+  uint8_t res=0,msk=0x80;
+  uint8_t nn,live,j;
+  /* MSB */
+  nn = n1b[cm1m1 & 0x01] + n1b[cm10 & 0xC0] +
+       n1b[c0m1 & 0x01] + n1b[c00 & 0x40] +
+       n1b[cp1m1 & 0x01] + n1b[cp10 & 0xC0];
+  live = n1b[c00 & 0x80];
+  if (rule(nn,live)) res |= msk;
+  else res &= ~msk;
+  msk >>= 1;
+  /* bit 6 */
+  nn = n1b[cm10 & 0xE0] + n1b[c00 & 0xA0] + n1b[cp10 & 0xE0];
+  live = n1b[c00 & 0x40];
+  if (rule(nn,live)) res |= msk;
+  else res &= ~msk;
+  msk >>= 1;
+  /* bit 5 */
+  nn = n1b[cm10 & 0x70] + n1b[c00 & 0x50] + n1b[cp10 & 0x70];
+  live = n1b[c00 & 0x20];
+  if (rule(nn,live)) res |= msk;
+  else res &= ~msk;
+  msk >>= 1;
+  /* bit 4 */
+  nn = n1b[cm10 & 0x38] + n1b[c00 & 0x28] + n1b[cp10 & 0x38];
+  live = n1b[c00 & 0x10];
+  if (rule(nn,live)) res |= msk;
+  else res &= ~msk;
+  msk >>= 1;
+  /* bit 3 */
+  nn = n1b[cm10 & 0x1C] + n1b[c00 & 0x14] + n1b[cp10 & 0x1C];
+  live = n1b[c00 & 0x08];
+  if (rule(nn,live)) res |= msk;
+  else res &= ~msk;
+  msk >>= 1;
+  /* bit 2 */
+  nn = n1b[cm10 & 0x0E] + n1b[c00 & 0x0A] + n1b[cp10 & 0x0E];
+  live = n1b[c00 & 0x04];
+  if (rule(nn,live)) res |= msk;
+  else res &= ~msk;
+  msk >>= 1;
+  /* bit 1 */
+  nn = n1b[cm10 & 0x07] + n1b[c00 & 0x05] + n1b[cp10 & 0x07];
+  live = n1b[c00 & 0x02];
+  if (rule(nn,live)) res |= msk;
+  else res &= ~msk;
+  msk >>= 1;
+  /* bit 0 */
+  nn = n1b[cm10 & 0x03] + n1b[cm1p1& 0x80] +
+       n1b[c00 & 0x02] + n1b[c0p1 & 0x80] +
+       n1b[cp10 & 0x03] + n1b[cp1p1 & 0x80];
+  live = n1b[c00 & 0x1];
+  if (rule(nn,live)) res |= msk;
+  else res &= ~msk;
+  return res;
+  }
+  
+      
+
 
 void life(board *curboard,board *nextboard) {
-  uint8_t *pm1m1,*pm10,*pm1p1,*p0m1,*p00,*p0p1,*pp1m1,*pp10,*pp1p1;
-  uint8_t live,nn,mskmp1m1,mskmp10, makmp1p1,
-  uint8_t msk0m1, msk00, msk0p1;
-  uint16_t i,j,nr=curboard->nr,nc=curboard->nc;
+// byte level (not pixel level) pointers
+#define CBPTR(i,j) (BPTR((curboard),(i),((j)<<3)))
+#define NBPTR(i,j) (BPTR((nextboard),(i),((j)<<3)))
+  uint16_t nr=curboard->nr,nc=curboard->nc;
+  int16_t i,j; 
 
-  /* set up pointers for (0,0) */
-  pm1m1 = BPTR(nr-1,nc-1); pm10 = BPTR(nr-1,0); pm1p1 = pm10+1;
-  p0m1 = BPTR(0,nc-1); p00 = BPTR(0,0); p01 = p00+1;
-  pp1m1 = BPTR(1,nc-1); pp10 = BPTR(1,0); pp1p1 = pp10+1;
+  for(i=0;i<nr;i++) {
+    /* set up initial pointers for row i */
+    // TODO special case for first and last row
+    uint8_t *pm1m1 = CBPTR((i-1)%nr,(nc-1)), *pm10 = CBPTR((i-1)%nr,0),  *pm1p1 = pm10+1;
+    uint8_t *p0m1  = CBPTR(i,(nc-1)),         *p00  = CBPTR(i,0),        *p0p1   = p00+1;
+    uint8_t *pp1m1 = CBPTR((i+1)%nr,(nc-1)),  *pp10 = CBPTR((i+1)%nr,0), *pp1p1 = pp10+1;
+    uint8_t cm1m1 = *pm1m1, cm10 = *pm10, cm1p1 = *pm1p1;
+    uint8_t c0m1  = *p0m1,  c00  = *p00,  c0p1  = *p0p1;
+    uint8_t cp1m1 = *pp1m1, cp10 = *pp10, cp1p1 = *pp1p1;
 
-  /* set up initial masks
-  mskmp1m1 = 0x01; mskmp10 = 0xC0; mskmp1p1=0x80;
-  msk0m1 = 0x01; msk00 = 0x40; msk0p1 = 0x80; 
-
-  for(i=0;i<nr;i++) {:
+    for(j=0;j<nc>>3;j++) { // process the byte at j
+      uint8_t ng = calcng(cm1m1, cm10, cm1p1,
+                          c0m1,  c00,  c0p1,
+                          cp1m1, cp10, cp1p1);
+      //NBPTR((i),(j)) = ng;
+      nextboard->base[i*(nc>>3)+j] = ng;
+      pm1p1++;
+      p0p1++;
+      pp1p1++;
+      if (j == (nc>>3) -1)  { // wrap
+        pm1p1 -= nc>>3;
+        p0p1 -= nc>>3;
+        pp1p1 -= nc>>3;
+        }
+      cm1m1 = cm10; cm10 = cm1p1; cm1p1 = *pm1p1;
+      c0m1  = c00;  c00  = c0p1;  c0p1  = *p0p1;
+      cp1m1 = cp10; cp10 = cp1p1; cp1p1 = *pp1p1;
+      } 
+    }
+  }
