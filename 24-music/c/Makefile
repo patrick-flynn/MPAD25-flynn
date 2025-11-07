@@ -5,13 +5,15 @@
 NAME       = 24-music
 CC         = mos-neo6502-clang
 NEOEMU     = neo
+SRCS = src/main.c src/sound.c
+AUXFILES = xml/SailOnBoys.csv
 
 default: all
 
 all:
 	@echo "Building project..."
 	mkdir -p bin
-	$(CC) -Os -o bin/$(NAME).neo src/main.c
+	$(CC) -Os -o bin/$(NAME).neo $(SRCS)
 	rm bin/$(NAME).neo.elf
 
 clean:
@@ -26,6 +28,7 @@ run: all
 	@echo "Launching emulator..."
 	mkdir -p storage
 	cp bin/$(NAME).neo storage
+	cp $(AUXFILES) storage
 	$(NEOEMU) bin/$(NAME).neo
 	rm -rf storage
 	rm memory.dump
