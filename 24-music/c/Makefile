@@ -6,7 +6,7 @@ NAME       = 24-music
 CC         = mos-neo6502-clang
 NEOEMU     = neo
 SRCS = src/main.c src/sound.c
-AUXFILES = xml/SailOnBoys.csv
+AUXFILES = xml/SailOnBoys.csv xml/the-deep-river-samba-traditionalish.csv xml/super-mario-bros-main-theme.csv
 
 default: all
 
