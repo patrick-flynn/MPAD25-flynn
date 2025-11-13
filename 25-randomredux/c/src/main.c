@@ -17,10 +17,14 @@
 
 int main(void) {
 
-  char *s = "1.0";
+  char *s = "402.0";
   float num = neo_math_string_to_number(s);
   char *ns = (char *)&num;
+  char s2[256];
 
-  printf("the string  1.0  became these fp bytes: %02x%02x%02x%02x\n",ns[0],ns[1],ns[2],ns[3]);
+  printf("the string  %s  became these fp bytes: %02x%02x%02x%02x\n",s,ns[0],ns[1],ns[2],ns[3]);
+
+  neo_math_number_to_string(num,s2);
+  printf("The floating point number in those bytes became this string: %s\n",s2);
 
   }

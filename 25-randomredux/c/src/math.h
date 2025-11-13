@@ -29,8 +29,8 @@ typedef struct _neomathreg {
 unsigned long neo_math_random_integer(unsigned long max);
 float neo_math_pstring_to_number(const neo_pstring_t *p_str);
 float neo_math_string_to_number(const char *str);
-
-
+void neo_math_number_to_pstring(float f,neo_pstring_t *p_str);
+void neo_math_number_to_string(float t, char *str);
 
 #ifdef __cplusplus
 }
