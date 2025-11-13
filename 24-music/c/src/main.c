@@ -156,13 +156,17 @@ int main(void) {
     }
   //printf("play (%d notes).\n",nn);
 
+  // wait
+  printf("Press any key:");
+  while (!neo_console_read_char()) /* wait */ ;
+
   // now play the tune
   uint32_t t0 = neo_system_timer() + 10; // 0.1 second delay
   uint16_t index = 0;
   while (1==1) {
     uint8_t ch=0;
     uint32_t off = note[index].offset;
-    //printf("offset %d: ",off);
+    printf("offset %d: ",off);
     // wait for timer to reach ofset for current note
     while (neo_system_timer() < t0 + off) /* wait */;
     // play all notes with this offset
@@ -171,14 +175,14 @@ int main(void) {
       if (ch < neo_sound_channel_count()) {
         uint32_t tdur = note[index].end - off;
         uint16_t dur=tdur;
-        //printf("[%d:%p %d]",index,note[index].pitch,dur);
+        printf("[%d:%p %d]",index,note[index].pitch,dur);
         neo_sound_queue(ch,note[index].pitch,dur,0,0);
         }
       ch++;
       index++;
       if (index >= nn) break;
       }
-    //printf("\n");
+    printf("\n");
     if (index >= nn) break;
     }
   while (1==1) ;
