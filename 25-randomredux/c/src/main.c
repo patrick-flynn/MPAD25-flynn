@@ -16,15 +16,11 @@
 #include "math.h"
 
 int main(void) {
-  uint32_t seed,sum=0;
 
-  printf("Enter seed: ");
-  scanf("%lu",&seed);
-  printf("%lu\n",seed);
+  char *s = "1.0";
+  float num = neo_math_string_to_number(s);
+  char *ns = (char *)&num;
 
-  for(uint32_t i=0; i<seed; i++) { sum += neo_math_random_integer(0xFFFF); }
-  printf("sum: %lu\n",sum);
+  printf("the string  1.0  became these fp bytes: %02x%02x%02x%02x\n",ns[0],ns[1],ns[2],ns[3]);
 
-  for(uint8_t i=0;i<10;i++)
-    printf("%lu ",neo_math_random_integer(10000));
   }

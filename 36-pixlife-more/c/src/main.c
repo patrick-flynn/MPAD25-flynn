@@ -128,7 +128,7 @@ int main(void) {
     tmpboard = curboard;
     curboard = nextboard;
     nextboard = tmpboard;
-    disp(curboard);
+    //disp(curboard);
     }
   return 0;
   }

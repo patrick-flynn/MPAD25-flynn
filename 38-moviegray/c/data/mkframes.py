@@ -16,7 +16,7 @@ with open('movie.bin','wb') as f:
 		else:
 			# could probably do this in one step, but...
 			im2 = cv2.cvtColor(im,cv2.COLOR_BGR2RGB)
-			im3 = Image.fromarray(im2).resize((160,285)).crop((0,50,160,170))
+			im3 = Image.fromarray(im2).resize((240,428)).crop((0,75,240,255))
 			im4 = im3.convert('L')
 			if (nf == 22):
 				im4.save(f'{nf}.png',format='PNG')
