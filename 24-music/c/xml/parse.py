@@ -4,9 +4,9 @@ import music21
 
 # get some music.
 
-#fn = 'Sail On, Boys v2.musicxml'
+fn = 'Sail On, Boys v2.musicxml'
 #fn = 'the-deep-river-samba-traditionalish.musicxml'
-fn = 'super-mario-bros-main-theme.musicxml'
+#fn = 'super-mario-bros-main-theme.musicxml'
 
 score = music21.converter.parse(fn).expandRepeats()
 

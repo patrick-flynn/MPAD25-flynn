@@ -21,7 +21,7 @@
 #include <neo/system.h>
 #include <neo/file.h>
 
-// #define FN "SailOnBoys.csv"
+//#define FN "SailOnBoys.csv"
 //#define FN "the-deep-river-samba-traditionalish.csv"
 #define FN "super-mario-bros-main-theme.csv"
 
@@ -30,6 +30,10 @@ typedef struct {
   uint16_t pitch;
   uint16_t end;
   } note_t;
+
+// playback "speed factor" - 2 is normalish; higher is faster, lower is slower
+#define SPEED 2
+
 
 #define NMAX 1024
 note_t note[NMAX];
@@ -135,7 +139,7 @@ int main(void) {
     ostr = strtok(line,",");
     // convert to int
     //printf("ostr %s\n",ostr);
-    offset = atoi(ostr)/3;
+    offset = atoi(ostr)/SPEED;
     //printf("offset %d\n",offset);
     nstr = strtok(NULL,",");
     //printf("nstr %s\n",nstr);
@@ -143,7 +147,7 @@ int main(void) {
     //printf("pitch 0x%x\n",pitch);
     estr = strtok(NULL,",");
     //printf("dstr %s\n",dstr);
-    end = atoi(estr)/3; // duration in ticks at specified qpm 
+    end = atoi(estr)/SPEED; // duration in ticks at specified qpm 
     note[nn].offset = offset;
     note[nn].pitch = pitch;
     note[nn].end = end;
