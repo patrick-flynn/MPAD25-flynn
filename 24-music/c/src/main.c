@@ -166,13 +166,18 @@ int main(void) {
 
   // now play the tune
   uint32_t t0 = neo_system_timer() + 10; // 0.1 second delay
+  uint32_t oldt0 = t0;
   uint16_t index = 0;
   while (1==1) {
     uint8_t ch=0;
     uint32_t off = note[index].offset;
     printf("offset %d: ",off);
     // wait for timer to reach ofset for current note
-    while (neo_system_timer() < t0 + off) /* wait */;
+    //while (neo_system_timer() < t0 + off) /* wait */;
+    // alt: wait for 5 seconds to elapse
+    //while (neo_system_timer() < oldt0 + 500) /* wait */;
+    //oldt0 = neo_system_timer(); 
+    //printf("CHUNK.\n");
     // play all notes with this offset
     while (note[index].offset == off) {
       // play up to channel_count sounds
