@@ -141,8 +141,11 @@ int main(void) {
     neo_graphics_draw_line(point[0].x,point[0].y,cx,cy);
     neo_graphics_draw_line(point[1].x,point[1].y,cx,cy);
 
-    uint32_t fc = neo_graphics_frame_count();
-    while (neo_console_read_char() == 0) /* wait */;
+    // uncomment this check to run until a horiz or vert lineis handled.
+    //if ((dx ==0) || (dy == 0)) {
+      uint32_t fc = neo_graphics_frame_count();
+      while (neo_console_read_char() == 0) /* wait */;
+    //}
     //while (neo_graphics_frame_count() < fc+200 ) /* wait */ ;
     }
 }

@@ -59,6 +59,7 @@ void nm_2regs_set_lval(neo_math_2registers *regs,uint8_t idx,int32_t l) {
 
 // all of the two-float-operand functions follow a very similar pattern.
 
+#if 0
 #define NEO_MATH_2ARGS(funcname,funcnum) \
   float funcname(float f1,float f2) { \
     neo_math_2registers regs; \
@@ -73,7 +74,6 @@ void nm_2regs_set_lval(neo_math_2registers *regs,uint8_t idx,int32_t l) {
     }
   
    
-#if 0
 float neo_math_2args(float f1, float f2,uint8_t funcnum) { 
   neo_math_2registers regs;
   regs.type[0] = regs.type[1] = NEO_MATH_TYPE_FLOAT; // force float args
@@ -85,7 +85,6 @@ float neo_math_2args(float f1, float f2,uint8_t funcnum) {
   float res = nm_2regs_get_fval(&regs,0);
   return res;
   }
-#endif
 
 // one-float-argument functions
 // also used for the (lone) no-argument function.
@@ -104,7 +103,6 @@ NEO_MATH_2ARGS(neo_math_add,API_FN_ADD);
 NEO_MATH_2ARGS(neo_math_sub,API_FN_SUB);
 NEO_MATH_2ARGS(neo_math_mul,API_FN_MUL);
 NEO_MATH_2ARGS(neo_math_div_dec,API_FN_DIV_DEC);
-#if 0
 // Function 0 : Addition
 float neo_math_1arg(float f,uint8_t funcnum) {
   neo_math_register reg1;
@@ -262,7 +260,6 @@ float neo_math_abs(float f1) {
 float neo_math_random_dec(void) {
   return neo_math_1arg(0.0,API_FN_RND_DEC);
   }
-#endif
 
 // Function 28 : Random Integer
 // Register1 := random integer from 0 to (Register 1-1)
@@ -300,8 +297,13 @@ float neo_math_pstring_to_number(const neo_pstring_t *p_str) {
 
 // glue code for C (null-terminated) strings
 float neo_math_string_to_number(const char *str) {
+  printf("str %s\n",str);
   PASCALIZE_INPUT(str, str_p);
-  return neo_math_pstring_to_number((neo_pstring_t *)str_p);
+  printf("pstr [%d]: %c%c%c\n",str_p[0],str_p[1],str_p[2],str_p[3]);
+  float f = neo_math_pstring_to_number((neo_pstring_t *)str_p);
+  printf("num %f\n",f);
+  while (1==1);
+  return f;
   }
 
 // Function 34 : Number to String
@@ -332,7 +334,6 @@ void neo_math_number_to_string(float f, char *str) {
   return;
   }
 
-#if 0
 // Function 35 : Set Degree/Radian Mode
 // Sets the use of degrees (the default) when non zero
 // radians when zero.
