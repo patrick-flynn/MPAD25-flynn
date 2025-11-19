@@ -38,7 +38,7 @@ typedef struct __neomathregs {
 float nm_2regs_get_fval(neo_math_2registers *regs,uint8_t idx);
 void nm_2regs_set_fval(neo_math_2registers *regs,uint8_t idx,float f);
 
-int32_t float nm_2regs_get_lval(neo_math_2registers *regs,uint8_t idx);
+int32_t nm_2regs_get_lval(neo_math_2registers *regs,uint8_t idx);
 void nm_2regs_set_lval(neo_math_2registers *regs,uint8_t idx,int32_t f);
 
 
@@ -176,7 +176,7 @@ float neo_math_random_dec(void);
 // Function 28 : Random Integer
 // Register1 := random integer from 0 to (Register 1-1)
 
-uint32_t long neo_math_random_integer(uint32_t max);
+uint32_t neo_math_random_integer(uint32_t max);
 
 // Function 32 : Number to Decimal
 // Helper function for tokeniser, do not use.

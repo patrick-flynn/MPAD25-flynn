@@ -45,7 +45,7 @@ int main(void) {
   neo_math_number_to_string(res,s5);
   printf("(%s)\n",s5);
 
-  res = neo_math_div_decimal(num,num);
+  res = neo_math_div_dec(num,num);
   printf("The ratio of %s and itself is 0x%lx ",s2,*((uint32_t *)(void *)&res));
   char s6[32];
   neo_math_number_to_string(res,s6);

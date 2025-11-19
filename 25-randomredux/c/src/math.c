@@ -17,12 +17,13 @@
 // using zero-based indexing internally:
 // idx is 0 for reg1 and 1 for reg2.
 
+
 float nm_2regs_get_fval(neo_math_2registers *regs,uint8_t idx) {
   uint8_t *p = regs->contents + idx;
   uint32_t l = p[0] | (((uint32_t)p[2])<<8) | (((uint32_t)p[4])<<16) | (((uint32_t)p[6])<<24);
-  float *f = (float *)&l; 
+  float f = *(float *)&l; 
   if (regs->type[0] == NEO_MATH_TYPE_FLOAT) 
-    return *f;
+    return f;
   else
     return 1.0*l;
   }
@@ -58,55 +59,89 @@ void nm_2regs_set_lval(neo_math_2registers *regs,uint8_t idx,int32_t l) {
 
 // all of the two-float-operand functions follow a very similar pattern.
 
+#define NEO_MATH_2ARGS(funcname,funcnum) \
+  float funcname(float f1,float f2) { \
+    neo_math_2registers regs; \
+    regs.type[0] = regs.type[1] = NEO_MATH_TYPE_FLOAT; \
+    nm_2regs_set_fval(&regs,0,f1); \
+    nm_2regs_set_fval(&regs,1,f2); \
+    ((volatile uint16_t *)ControlPort.params)[0] = (uint16_t)&regs; \
+    ControlPort.params[2] = 0x02;  \
+    KSendMessageSync(API_GROUP_MATH,funcnum); \
+    float res = nm_2regs_get_fval(&regs,0); \
+    return res; \
+    }
+  
+   
+#if 0
 float neo_math_2args(float f1, float f2,uint8_t funcnum) { 
   neo_math_2registers regs;
   regs.type[0] = regs.type[1] = NEO_MATH_TYPE_FLOAT; // force float args
   nm_2regs_set_fval(&regs,0,f1); 
   nm_2regs_set_fval(&regs,1,f2);
-  ((volatile uint16_t *)ControlPort.params)[0] = (uint16_t)&regs;
+  ((volatile uint16_t **)ControlPort.params)[0] = (uint16_t *)&regs;
   ControlPort.params[2] = 0x02; // interleave = # of args
   KSendMessageSync(API_GROUP_MATH,funcnum);
   float res = nm_2regs_get_fval(&regs,0);
   return res;
   }
- 
+#endif
+
 // one-float-argument functions
 // also used for the (lone) no-argument function.
+#define NEO_MATH_1ARG(funcname,funcnum) \
+  float funcname(float f) { \
+    neo_math_register reg1; \
+    reg1.v.f = f; \
+    reg1.type = NEO_TYPE_FLOAT; \
+    ((volatile uint16_t *)ControlPort.params)[0] = (uint16_t)&reg1; \
+    ControlPort.params[2] = 0x01; \
+    KSendMessageSync(API_GROUP_MATH,funcnum); \
+    return reg1.v.f; \
+    }
+
+NEO_MATH_2ARGS(neo_math_add,API_FN_ADD);
+NEO_MATH_2ARGS(neo_math_sub,API_FN_SUB);
+NEO_MATH_2ARGS(neo_math_mul,API_FN_MUL);
+NEO_MATH_2ARGS(neo_math_div_dec,API_FN_DIV_DEC);
+#if 0
+// Function 0 : Addition
 float neo_math_1arg(float f,uint8_t funcnum) {
   neo_math_register reg1;
+  reg1.v.f = f;
+  reg1.type = NEO_TYPE_FLOAT;
   ((volatile uint16_t *)ControlPort.params)[0] = (uint16_t)&reg1;
   ControlPort.params[2] = 0x01;
   KSendMessageSync(API_GROUP_MATH,funcnum);
   return reg1.v.f;
   }
-  
 
 // Function 0 : Addition
 // Register1 := Register 1 + Register2
 
 float neo_math_add(float f1, float f2) {
-  return neo_math_2args(f1,f2,API_FN_ADD);
+  return NEO_MATH_2ARGS(f1,f2,API_FN_ADD);
   }
 
 // Function 1 : Subtraction
 // Register1 := Register 1 - Register2
 
 float neo_math_sub(float minuend, float subtrahend) {
-  return neo_math_2args(minuend, subtrahend, API_FN_SUB);
+  return NEO_MATH_2ARGS(minuend, subtrahend, API_FN_SUB);
   }
 
 // Function 2 : Multiplication
 //Register1 := Register 1 * Register2
 
 float neo_math_mul(float f1, float f2) {
-  return neo_math_2args(f1,f2,API_FN_MUL);
+  return NEO_MATH_2ARGS(f1,f2,API_FN_MUL);
   }
 
 // Function 3 : Decimal Division
 // Register1 := Register 1 / Register2 (floating point)
 
 float neo_math_div_dec(float dividend, float divisor) {
-  return neo_math_2args(dividend, divisor, API_FN_DIV_DEC);
+  return NEO_MATH_2ARGS(dividend, divisor, API_FN_DIV_DEC);
   }
 
 // Function 4 : Integer Division
@@ -127,14 +162,14 @@ float neo_math_div_dec(float dividend, float divisor) {
 // Register1 := Register 1 to the power of Register2
 
 float neo_math_pow(float base, float exponent) {
-  return neo_math_2args(base, exponent, API_FN_POW);
+  return NEO_MATH_2ARGS(base, exponent, API_FN_POW);
   }
 
 // Function 8 : Distance (counter-rectangle)
 // Register1 := Square root of (Register1 * Register1) +
 //                             (Register2 * Register2)
 float neo_math_distance(float f1, float f2) {
-  return neo_math_2args(f1, f2, ,API_FN_DISTANCE);
+  return NEO_MATH_2ARGS(f1, f2, API_FN_DISTANCE);
   }
 
 // note: angle arguments aned return values are in
@@ -145,7 +180,7 @@ float neo_math_distance(float f1, float f2) {
 // Register1 := arctangent2(Register 1,Register 2)
 // 
 float neo_math_atan2(float f1, float f2) {
-  return neo_math_2args(f1,f2,API_FN_ATAN2);
+  return NEO_MATH_2ARGS(f1,f2,API_FN_ATAN2);
   }
 
 // Function 16 : Negate
@@ -177,7 +212,7 @@ float neo_math_sin(float f1) {
 // Register1 := cosine(Register 1) angles in degrees/radians
 // see API function 35 to change mode 
 float neo_math_cos(float f1) {
-  return neo_math_1arg(f1,API_FN_COSINE);
+  return neo_math_1arg(f1,API_FN_COS);
   }
 
 
@@ -227,11 +262,12 @@ float neo_math_abs(float f1) {
 float neo_math_random_dec(void) {
   return neo_math_1arg(0.0,API_FN_RND_DEC);
   }
+#endif
 
 // Function 28 : Random Integer
 // Register1 := random integer from 0 to (Register 1-1)
 // needs custom implementation because it's an integer result
-uint32_t long neo_math_random_integer(uint32_t max) {
+uint32_t neo_math_random_integer(uint32_t max) {
   neo_math_register reg1;
   reg1.v.l = max;
   reg1.type = NEO_MATH_TYPE_LONG; // integer
@@ -279,11 +315,11 @@ void neo_math_number_to_pstring(float f,neo_pstring_t *p_str) {
   reg1.v.f = f;
   reg1.type = NEO_MATH_TYPE_FLOAT; // float
   // set up register1 -- no interleaving
-  ((volatile uint16_t *)ControlPort.params)[0] = (uint16_t)&reg1;
+  *((volatile uint16_t *)ControlPort.params) = (uint16_t)&reg1;
   ControlPort.params[2] = 0x01; // interleave (only one register)
   KSendMessageSync(API_GROUP_MATH,API_FN_NUM_TO_STR);
   // copy bytes of result to pstring address supplied as argument
-  neo_pstring_t *r = *((neo_pstring_t *)(ControlPort.params+4));
+  neo_pstring_t *r = (neo_pstring_t *)(ControlPort.params[4] | (ControlPort.params[5]<<8));
   for(uint16_t i=0;i<((char *)r)[0];i++) p_str[i] = r[i];
   return;
   } 
@@ -296,6 +332,7 @@ void neo_math_number_to_string(float f, char *str) {
   return;
   }
 
+#if 0
 // Function 35 : Set Degree/Radian Mode
 // Sets the use of degrees (the default) when non zero
 // radians when zero.
@@ -303,4 +340,4 @@ void neo_math_set_deg_rad_mode(float f) {
   neo_math_1arg(f,API_FN_SET_DEG_RAD_MODE);
   return;
   }
-
+#endif
